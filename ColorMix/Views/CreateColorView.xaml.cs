@@ -24,7 +24,23 @@ public partial class CreateColorView : ContentPage
 		InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
+        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
 	}
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CreateColorViewModel.ColorDrawable) ||
+            e.PropertyName == nameof(CreateColorViewModel.RgbRed) ||
+            e.PropertyName == nameof(CreateColorViewModel.RgbGreen) ||
+            e.PropertyName == nameof(CreateColorViewModel.RgbBlue) ||
+            e.PropertyName == nameof(CreateColorViewModel.CmykCyan) ||
+            e.PropertyName == nameof(CreateColorViewModel.CmykMagenta) ||
+            e.PropertyName == nameof(CreateColorViewModel.CmykYellow) ||
+            e.PropertyName == nameof(CreateColorViewModel.CmykBlack))
+        {
+            ColorPreview.Invalidate();
+        }
+    }
 
 	protected override void OnAppearing()
 	{

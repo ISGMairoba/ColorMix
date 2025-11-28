@@ -2,105 +2,168 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:ColorMix.Models"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:helpers="clr-namespace:ColorMix.Helpers"
     x:Class="ColorMix.Views.ColorsView"
     Title="ColorsView">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*, Auto, Auto, Auto" Padding="0,0,10,0" ColumnSpacing="5">
-            <!-- Normal State -->
-            <Label 
-                Grid.Column="0"
-                Text="Colors" 
-                FontSize="20" 
-                FontAttributes="Bold" 
-                VerticalOptions="Center" 
-                TextColor="{AppThemeBinding Light=Black, Dark=White}"
-                IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}"/>
-
-            <!-- Search State -->
-            <SearchBar 
+        <Grid ColumnDefinitions="*, Auto" Padding="0,0,10,0">
+            <!-- Normal Toolbar -->
+            <Grid 
                 Grid.Column="0" 
-                Placeholder="Search..." 
-                Text="{Binding SearchText}" 
-                VerticalOptions="Center"
-                BackgroundColor="Transparent"
-                IsVisible="{Binding IsSearching}"/>
+                Grid.ColumnSpan="2"
+                ColumnDefinitions="*, Auto, Auto, Auto" 
+                ColumnSpacing="15"
+                IsVisible="{Binding IsSelectionMode, Converter={toolkit:InvertedBoolConverter}}">
+                
+                <!-- Title / Search Bar -->
+                <Grid Grid.Column="0">
+                    <Label 
+                        Text="Colors" 
+                        FontSize="20" 
+                        FontAttributes="Bold" 
+                        VerticalOptions="Center" 
+                        TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                        IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}"/>
 
-            <!-- Search Icon (Toggle) -->
-            <ImageButton
-                Grid.Column="1"
-                Source="{AppThemeBinding Light=search_black.png, Dark=search_white.png}"
-                Command="{Binding ToggleSearchCommand}"
-                HeightRequest="24"
-                WidthRequest="24"
-                VerticalOptions="Center"
-                IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
-                 <ImageButton.Source>
-                    <FontImageSource FontFamily="IconFont" Glyph="&#xf002;" Color="{AppThemeBinding Light=Black, Dark=White}" Size="20"/>
-                </ImageButton.Source>
-            </ImageButton>
+                    <SearchBar 
+                        Placeholder="Search..." 
+                        Text="{Binding SearchText}" 
+                        VerticalOptions="Center"
+                        BackgroundColor="Transparent"
+                        IsVisible="{Binding IsSearching}"/>
+                </Grid>
 
-             <!-- Close Search Icon -->
-            <ImageButton
-                Grid.Column="1"
-                Command="{Binding ToggleSearchCommand}"
-                HeightRequest="24"
-                WidthRequest="24"
-                VerticalOptions="Center"
-                IsVisible="{Binding IsSearching}">
-                 <ImageButton.Source>
-                    <FontImageSource FontFamily="IconFont" Glyph="&#xf00d;" Color="{AppThemeBinding Light=Black, Dark=White}" Size="20"/>
-                </ImageButton.Source>
-            </ImageButton>
+                <!-- Search Icon -->
+                <ImageButton
+                    Grid.Column="1"
+                    Command="{Binding ToggleSearchCommand}"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    VerticalOptions="Center">
+                    <ImageButton.Source>
+                        <FontImageSource 
+                            FontFamily="IconFont" 
+                            Glyph="{x:Static helpers:FontIcons.Search}" 
+                            Color="{AppThemeBinding Light=Black, Dark=White}" 
+                            Size="22"/>
+                    </ImageButton.Source>
+                    <ImageButton.Triggers>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsSearching}" Value="True">
+                            <Setter Property="Source">
+                                <Setter.Value>
+                                    <FontImageSource 
+                                        FontFamily="IconFont" 
+                                        Glyph="{x:Static helpers:FontIcons.SearchCancel}" 
+                                        Color="{AppThemeBinding Light=Black, Dark=White}" 
+                                        Size="22"/>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </ImageButton.Triggers>
+                </ImageButton>
 
-            <!-- Sort Icon -->
-            <ImageButton
-                Grid.Column="2"
-                Command="{Binding OpenSortCommand}"
-                HeightRequest="24"
-                WidthRequest="24"
-                VerticalOptions="Center"
-                IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
-                <ImageButton.Source>
-                    <FontImageSource FontFamily="IconFont" Glyph="&#xf160;" Color="{AppThemeBinding Light=Black, Dark=White}" Size="20"/>
-                </ImageButton.Source>
-            </ImageButton>
+                <!-- Sort Icon -->
+                <ImageButton
+                    Grid.Column="2"
+                    Command="{Binding OpenSortCommand}"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    VerticalOptions="Center"
+                    IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
+                    <ImageButton.Source>
+                        <FontImageSource 
+                            FontFamily="IconFont" 
+                            Glyph="{x:Static helpers:FontIcons.Sort}" 
+                            Color="{AppThemeBinding Light=Black, Dark=White}" 
+                            Size="22"/>
+                    </ImageButton.Source>
+                </ImageButton>
 
-            <!-- Select Icon -->
-            <ImageButton
-                Grid.Column="3"
-                Command="{Binding ToggleSelectionModeCommand}"
-                HeightRequest="24"
-                WidthRequest="24"
-                VerticalOptions="Center"
-                IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
-                <ImageButton.Source>
-                    <FontImageSource FontFamily="IconFont" Glyph="&#xf14a;" Color="{AppThemeBinding Light=Black, Dark=White}" Size="20"/>
-                </ImageButton.Source>
-            </ImageButton>
+                <!-- Select Icon -->
+                <ImageButton
+                    Grid.Column="3"
+                    Command="{Binding ToggleSelectionModeCommand}"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    VerticalOptions="Center"
+                    IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
+                    <ImageButton.Source>
+                        <FontImageSource 
+                            FontFamily="IconFont" 
+                            Glyph="{x:Static helpers:FontIcons.Selection}" 
+                            Color="{AppThemeBinding Light=Black, Dark=White}" 
+                            Size="22"/>
+                    </ImageButton.Source>
+                </ImageButton>
+            </Grid>
+
+            <!-- Selection Mode Toolbar -->
+            <Grid 
+                Grid.Column="1" 
+                ColumnDefinitions="Auto, Auto, Auto, Auto" 
+                ColumnSpacing="15"
+                IsVisible="{Binding IsSelectionMode}">
+                
+                <Button 
+                    Grid.Column="0" 
+                    Text="All" 
+                    Command="{Binding SelectAllCommand}" 
+                    BackgroundColor="Transparent" 
+                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                    FontAttributes="Bold"
+                    Padding="0"/>
+
+                <Button 
+                    Grid.Column="1" 
+                    Text="None" 
+                    Command="{Binding DeselectAllCommand}" 
+                    BackgroundColor="Transparent" 
+                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                    FontAttributes="Bold"
+                    Padding="0"/>
+
+                <ImageButton
+                    Grid.Column="2"
+                    Command="{Binding BatchDuplicateCommand}"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    VerticalOptions="Center">
+                    <ImageButton.Source>
+                        <FontImageSource 
+                            FontFamily="IconFont" 
+                            Glyph="{x:Static helpers:FontIcons.Copy}" 
+                            Color="{AppThemeBinding Light=Black, Dark=White}" 
+                            Size="22"/>
+                    </ImageButton.Source>
+                </ImageButton>
+
+                <ImageButton
+                    Grid.Column="3"
+                    Command="{Binding BatchDeleteCommand}"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    VerticalOptions="Center">
+                    <ImageButton.Source>
+                        <FontImageSource 
+                            FontFamily="IconFont" 
+                            Glyph="{x:Static helpers:FontIcons.Delete}" 
+                            Color="{StaticResource MrbRed}" 
+                            Size="22"/>
+                    </ImageButton.Source>
+                </ImageButton>
+            </Grid>
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto, *">
-        <!-- Batch Action Toolbar -->
-        <Grid 
-            Grid.Row="0" 
-            IsVisible="{Binding IsSelectionMode}" 
-            BackgroundColor="{AppThemeBinding Light=#F0F0F0, Dark=#303030}"
-            Padding="10"
-            ColumnDefinitions="*,*,*,*">
-            
-            <Button Grid.Column="0" Text="All" Command="{Binding SelectAllCommand}" Margin="2" FontSize="12"/>
-            <Button Grid.Column="1" Text="None" Command="{Binding DeselectAllCommand}" Margin="2" FontSize="12"/>
-            <Button Grid.Column="2" Text="Copy" Command="{Binding BatchDuplicateCommand}" Margin="2" FontSize="12"/>
-            <Button Grid.Column="3" Text="Delete" Command="{Binding BatchDeleteCommand}" BackgroundColor="{StaticResource MrbRed}" Margin="2" FontSize="12"/>
-        </Grid>
+    <Grid RowDefinitions="*">
 
         <ScrollView Grid.Row="1">
             <CollectionView HorizontalOptions="Center" ItemsSource="{Binding ColorList}">
                 <CollectionView.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="models:ColorsModel">
                         <Frame Margin="10,5" HeightRequest="85" HasShadow="True" CornerRadius="10">
                             <Grid RowDefinitions="25, *, 25" ColumnDefinitions="Auto, 80, *">
                                 

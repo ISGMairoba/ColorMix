@@ -220,7 +220,7 @@ namespace ColorMix.ViewModel
                 }
 
                 // Navigate back
-                await Shell.Current.GoToAsync("//ColorsView");
+                await Shell.Current.GoToAsync("..");
             }
             catch (Exception ex)
             {

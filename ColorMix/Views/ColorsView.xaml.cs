@@ -13,6 +13,19 @@ public partial class ColorsView : ContentPage
 		BindingContext = _viewModel;
 	}
 
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is ColorsViewModel vm)
+        {
+            // Reset state on a background thread as requested
+            Task.Run(() => 
+            {
+                MainThread.BeginInvokeOnMainThread(() => vm.ResetState());
+            });
+        }
+    }
+
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();

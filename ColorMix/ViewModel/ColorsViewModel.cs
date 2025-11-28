@@ -246,6 +246,13 @@ namespace ColorMix.ViewModel
             ColorList = new ObservableCollection<ColorsModel>(filtered);
         }
 
+        public void ResetState()
+        {
+            IsSelectionMode = false;
+            IsSearching = false;
+            SearchText = string.Empty;
+        }
+
         private async Task OnEditAsync(ColorsModel colorModel)
         {
             try
@@ -262,7 +269,8 @@ namespace ColorMix.ViewModel
                     { "HexValue", colorModel.HexValue }
                 };
 
-                await Shell.Current.GoToAsync("//CreateColorsView", navigationParameter);
+                // Use relative routing to preserve navigation stack
+                await Shell.Current.GoToAsync("EditColor", navigationParameter);
             }
             catch (Exception ex)
             {
