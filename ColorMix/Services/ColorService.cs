@@ -54,5 +54,24 @@ namespace ColorMix.Services
         {
             return await _context.Colors.CountAsync();
         }
+
+        public async Task AddColorsAsync(IEnumerable<ColorEntity> colors)
+        {
+            await _context.Colors.AddRangeAsync(colors);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteColorsAsync(IEnumerable<int> ids)
+        {
+            var colorsToDelete = await _context.Colors
+                .Where(c => ids.Contains(c.Id))
+                .ToListAsync();
+
+            if (colorsToDelete.Any())
+            {
+                _context.Colors.RemoveRange(colorsToDelete);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

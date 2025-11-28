@@ -40,15 +40,15 @@
                 <ImageButton
                     Grid.Column="1"
                     Command="{Binding ToggleSearchCommand}"
-                    HeightRequest="40"
-                    WidthRequest="40"
+                    HeightRequest="30"
+                    WidthRequest="30"
                     VerticalOptions="Center">
                     <ImageButton.Source>
                         <FontImageSource 
                             FontFamily="IconFont" 
                             Glyph="{x:Static helpers:FontIcons.Search}" 
                             Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="22"/>
+                            Size="14"/>
                     </ImageButton.Source>
                     <ImageButton.Triggers>
                         <DataTrigger TargetType="ImageButton" Binding="{Binding IsSearching}" Value="True">
@@ -58,7 +58,7 @@
                                         FontFamily="IconFont" 
                                         Glyph="{x:Static helpers:FontIcons.SearchCancel}" 
                                         Color="{AppThemeBinding Light=Black, Dark=White}" 
-                                        Size="22"/>
+                                        Size="14"/>
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
@@ -69,8 +69,8 @@
                 <ImageButton
                     Grid.Column="2"
                     Command="{Binding OpenSortCommand}"
-                    HeightRequest="40"
-                    WidthRequest="40"
+                    HeightRequest="30"
+                    WidthRequest="30"
                     VerticalOptions="Center"
                     IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
                     <ImageButton.Source>
@@ -78,7 +78,7 @@
                             FontFamily="IconFont" 
                             Glyph="{x:Static helpers:FontIcons.Sort}" 
                             Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="22"/>
+                            Size="14"/>
                     </ImageButton.Source>
                 </ImageButton>
 
@@ -86,8 +86,8 @@
                 <ImageButton
                     Grid.Column="3"
                     Command="{Binding ToggleSelectionModeCommand}"
-                    HeightRequest="40"
-                    WidthRequest="40"
+                    HeightRequest="30"
+                    WidthRequest="30"
                     VerticalOptions="Center"
                     IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
                     <ImageButton.Source>
@@ -95,7 +95,7 @@
                             FontFamily="IconFont" 
                             Glyph="{x:Static helpers:FontIcons.Selection}" 
                             Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="22"/>
+                            Size="14"/>
                     </ImageButton.Source>
                 </ImageButton>
             </Grid>
@@ -103,12 +103,21 @@
             <!-- Selection Mode Toolbar -->
             <Grid 
                 Grid.Column="1" 
-                ColumnDefinitions="Auto, Auto, Auto, Auto" 
+                ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto" 
                 ColumnSpacing="15"
                 IsVisible="{Binding IsSelectionMode}">
                 
                 <Button 
                     Grid.Column="0" 
+                    Text="Cancel" 
+                    Command="{Binding ToggleSelectionModeCommand}" 
+                    BackgroundColor="Transparent" 
+                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                    FontAttributes="Bold"
+                    Padding="0"/>
+
+                <Button 
+                    Grid.Column="1" 
                     Text="All" 
                     Command="{Binding SelectAllCommand}" 
                     BackgroundColor="Transparent" 
@@ -117,7 +126,7 @@
                     Padding="0"/>
 
                 <Button 
-                    Grid.Column="1" 
+                    Grid.Column="2" 
                     Text="None" 
                     Command="{Binding DeselectAllCommand}" 
                     BackgroundColor="Transparent" 
@@ -126,32 +135,47 @@
                     Padding="0"/>
 
                 <ImageButton
-                    Grid.Column="2"
+                    Grid.Column="3"
+                    Command="{Binding BatchShareCommand}"
+                    HeightRequest="30"
+                    WidthRequest="30"
+                    VerticalOptions="Center">
+                    <ImageButton.Source>
+                        <FontImageSource 
+                            FontFamily="IconFont" 
+                            Glyph="{x:Static helpers:FontIcons.Share}" 
+                            Color="{AppThemeBinding Light=Black, Dark=White}" 
+                            Size="14"/>
+                    </ImageButton.Source>
+                </ImageButton>
+
+                <ImageButton
+                    Grid.Column="4"
                     Command="{Binding BatchDuplicateCommand}"
-                    HeightRequest="40"
-                    WidthRequest="40"
+                    HeightRequest="30"
+                    WidthRequest="30"
                     VerticalOptions="Center">
                     <ImageButton.Source>
                         <FontImageSource 
                             FontFamily="IconFont" 
                             Glyph="{x:Static helpers:FontIcons.Copy}" 
                             Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="22"/>
+                            Size="14"/>
                     </ImageButton.Source>
                 </ImageButton>
 
                 <ImageButton
-                    Grid.Column="3"
+                    Grid.Column="5"
                     Command="{Binding BatchDeleteCommand}"
-                    HeightRequest="40"
-                    WidthRequest="40"
+                    HeightRequest="30"
+                    WidthRequest="30"
                     VerticalOptions="Center">
                     <ImageButton.Source>
                         <FontImageSource 
                             FontFamily="IconFont" 
                             Glyph="{x:Static helpers:FontIcons.Delete}" 
                             Color="{StaticResource MrbRed}" 
-                            Size="22"/>
+                            Size="14"/>
                     </ImageButton.Source>
                 </ImageButton>
             </Grid>

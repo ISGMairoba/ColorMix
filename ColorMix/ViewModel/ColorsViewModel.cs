@@ -5,6 +5,8 @@ using System.Windows.Input;
 using ColorMix.Data.Entities;
 using ColorMix.Services;
 using ColorMix.Models;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 
 namespace ColorMix.ViewModel
 {
@@ -100,6 +102,7 @@ namespace ColorMix.ViewModel
         public ICommand DeselectAllCommand { get; }
         public ICommand BatchDeleteCommand { get; }
         public ICommand BatchDuplicateCommand { get; }
+        public ICommand BatchShareCommand { get; }
 
         public ICommand ToggleSearchCommand { get; }
         public ICommand OpenSortCommand { get; }
@@ -131,6 +134,7 @@ namespace ColorMix.ViewModel
 
             BatchDeleteCommand = new Command(async () => await OnBatchDeleteAsync());
             BatchDuplicateCommand = new Command(async () => await OnBatchDuplicateAsync());
+            BatchShareCommand = new Command(async () => await OnBatchShareAsync());
 
             ToggleSearchCommand = new Command(() => IsSearching = !IsSearching);
             OpenSortCommand = new Command(async () => await OnOpenSortAsync());
@@ -178,9 +182,12 @@ namespace ColorMix.ViewModel
             
             if (confirm)
             {
+                var idsToDelete = selectedColors.Select(c => c.Id).ToList();
+                await _colorService.DeleteColorsAsync(idsToDelete);
+
+                // Remove from local lists without full reload
                 foreach (var color in selectedColors)
                 {
-                    await _colorService.DeleteColorAsync(color.Id);
                     _allColors.Remove(color);
                     ColorList.Remove(color);
                 }
@@ -212,12 +219,41 @@ namespace ColorMix.ViewModel
             var selectedColors = ColorList.Where(c => c.IsSelected).ToList();
             if (!selectedColors.Any()) return;
 
+            var newColors = new List<ColorEntity>();
             foreach (var color in selectedColors)
             {
-                await OnDuplicateAsync(color);
+                newColors.Add(new ColorEntity
+                {
+                    ColorName = $"{color.ColorName} (Copy)",
+                    HexValue = color.HexValue,
+                    Red = (int)(color.Color.Red * 255),
+                    Green = (int)(color.Color.Green * 255),
+                    Blue = (int)(color.Color.Blue * 255)
+                });
             }
+
+            await _colorService.AddColorsAsync(newColors);
             IsSelectionMode = false;
-            await LoadColorsAsync(); // Reload to show duplicates
+            await LoadColorsAsync(); // Reload to show duplicates with new IDs
+        }
+
+        private async Task OnBatchShareAsync()
+        {
+            var selectedColors = ColorList.Where(c => c.IsSelected).ToList();
+            if (!selectedColors.Any()) return;
+
+            var shareText = string.Join("\n\n", selectedColors.Select(c => 
+                $"Color: {c.ColorName}\n" +
+                $"Hex: {c.HexValue}\n" +
+                $"RGB: {(int)(c.Color.Red * 255)}, {(int)(c.Color.Green * 255)}, {(int)(c.Color.Blue * 255)}"));
+
+            await Share.RequestAsync(new ShareTextRequest
+            {
+                Text = shareText,
+                Title = $"Share {selectedColors.Count} Colors"
+            });
+            
+            IsSelectionMode = false;
         }
 
         private void ApplySortAndFilter()
@@ -295,7 +331,7 @@ namespace ColorMix.ViewModel
 
                 await _colorService.AddColorAsync(newColor);
                 await LoadColorsAsync();
-                await Application.Current.MainPage.DisplayAlert("Success", $"Duplicated '{colorModel.ColorName}'", "OK");
+                await Toast.Make($"Duplicated '{colorModel.ColorName}'").Show();
             }
             catch (Exception ex)
             {
@@ -341,7 +377,7 @@ namespace ColorMix.ViewModel
                 {
                     await _colorService.DeleteColorAsync(colorModel.Id);
                     await LoadColorsAsync();
-                    await Application.Current.MainPage.DisplayAlert("Success", $"Deleted '{colorModel.ColorName}'", "OK");
+                    await Toast.Make($"Deleted '{colorModel.ColorName}'").Show();
                 }
             }
             catch (Exception ex)

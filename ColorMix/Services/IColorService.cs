@@ -10,5 +10,7 @@ namespace ColorMix.Services
         Task<ColorEntity> UpdateColorAsync(ColorEntity color);
         Task<bool> DeleteColorAsync(int id);
         Task<int> GetColorCountAsync();
+        Task AddColorsAsync(IEnumerable<ColorEntity> colors);
+        Task DeleteColorsAsync(IEnumerable<int> ids);
     }
 }

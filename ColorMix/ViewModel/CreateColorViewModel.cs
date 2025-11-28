@@ -1,5 +1,7 @@
 ﻿using ColorMix.Helpers;
 using ColorMix.Services;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -190,6 +192,7 @@ namespace ColorMix.ViewModel
             try
             {
                 var hexValue = $"#{RgbRed:X2}{RgbGreen:X2}{RgbBlue:X2}";
+                string message = "";
 
                 if (ColorId > 0)
                 {
@@ -203,7 +206,12 @@ namespace ColorMix.ViewModel
                         existingColor.Green = RgbGreen;
                         existingColor.Blue = RgbBlue;
                         await _colorService.UpdateColorAsync(existingColor);
+                        message = "Color updated successfully";
                     }
+                    
+                    await Toast.Make(message).Show();
+                    // Navigate back only when editing
+                    await Shell.Current.GoToAsync("..");
                 }
                 else
                 {
@@ -217,10 +225,12 @@ namespace ColorMix.ViewModel
                         Blue = RgbBlue
                     };
                     await _colorService.AddColorAsync(newColor);
+                    message = "Color saved successfully";
+                    
+                    await Toast.Make(message).Show();
+                    // Reset form to allow adding more colors
+                    ResetColor();
                 }
-
-                // Navigate back
-                await Shell.Current.GoToAsync("..");
             }
             catch (Exception ex)
             {
