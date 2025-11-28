@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ColorMix.Views.CreatePaletteView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="CreatePalette">
+    <Grid Margin="0" RowDefinitions="Auto, Auto, *, Auto">
+        <!--  Pallete Colors  -->
+        <Frame Grid.Row="0">
+            <Grid RowDefinitions="auto, *">
+                <Label
+                    Grid.Row="0"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    HorizontalOptions="Start"
+                    Style="{StaticResource SecondaryLabel}"
+                    Text="Palette Colors"
+                    VerticalOptions="Center" />
+
+                <!--  To be reviewed and Bind  -->
+                <CollectionView
+                    Grid.Row="1"
+                    Margin="5"
+                    HorizontalOptions="Start"
+                    ItemsSource="{Binding PaletteColors}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="5" Orientation="Horizontal" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame
+                                Margin="0"
+                                Padding="0"
+                                BackgroundColor="Transparent"
+                                BorderColor="Transparent"
+                                CornerRadius="0"
+                                HeightRequest="60"
+                                HorizontalOptions="Center"
+                                MaximumWidthRequest="50"
+                                VerticalOptions="Center">
+                                <Grid RowDefinitions="*,auto, auto">
+                                    <RoundRectangle
+                                        BackgroundColor="{Binding Color}"
+                                        CornerRadius="5"
+                                        HeightRequest="30"
+                                        HorizontalOptions="Center"
+                                        Stroke="{AppThemeBinding Dark=White,
+                                                                 Light=Black}"
+                                        StrokeThickness="3"
+                                        VerticalOptions="Center"
+                                        WidthRequest="30" />
+                                    <Label
+                                        Grid.Row="1"
+                                        Margin="0"
+                                        FontAttributes="Bold"
+                                        FontSize="9"
+                                        HorizontalOptions="Center"
+                                        LineBreakMode="MiddleTruncation"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="{Binding ColorName}"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Row="2"
+                                        Margin="0"
+                                        FontAttributes="Bold"
+                                        FontSize="9"
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="{Binding DisplayText}"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Frame>
+
+        <!--  Blend Mode  -->
+        <Frame Grid.Row="1">
+            <Grid RowDefinitions="auto, *">
+                <Label
+                    Grid.Row="0"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    HorizontalOptions="Start"
+                    Style="{StaticResource SecondaryLabel}"
+                    Text="Blend Mode"
+                    VerticalOptions="Center" />
+                <HorizontalStackLayout Grid.Row="1" Spacing="10">
+                    <RadioButton
+                        Content="RGB"
+                        FontAttributes="Bold"
+                        GroupName="BlendMode" />
+                    <RadioButton
+                        Content="LAB"
+                        FontAttributes="Bold"
+                        GroupName="BlendMode" />
+                    <RadioButton
+                        Content="HLS"
+                        FontAttributes="Bold"
+                        GroupName="BlendMode" />
+                </HorizontalStackLayout>
+            </Grid>
+
+        </Frame>
+
+        <!--  Mixed Color  -->
+        <Frame Grid.Row="2" VerticalOptions="Fill">
+            <Grid RowDefinitions="auto, * , Auto">
+                <Label
+                    Grid.Row="0"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    HorizontalOptions="Start"
+                    Style="{StaticResource SecondaryLabel}"
+                    Text="MIxed Color"
+                    VerticalOptions="Center" />
+                <Grid
+                    Grid.Row="1"
+                    Background="Aqua"
+                    ColumnDefinitions="150, *"
+                    VerticalOptions="Fill">
+                    <RoundRectangle
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Background="Yellow"
+                        CornerRadius="10"
+                        HeightRequest="150"
+                        Stroke="{AppThemeBinding Dark=White,
+                                                 Light=Black}"
+                        StrokeThickness="5"
+                        VerticalOptions="Start"
+                        WidthRequest="150" />
+                </Grid>
+                <HorizontalStackLayout
+                    Grid.Row="2"
+                    Padding="0"
+                    Spacing="0">
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding ChangeModeCommand}"
+                        CommandParameter="SaveVariant"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Text="&#xE710; Save Variant"
+                        TextColor="{StaticResource MrbUNBlue}"
+                        VerticalOptions="Center" />
+
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding ChangeModeCommand}"
+                        CommandParameter="SaveVariant"
+                        FontAttributes="Bold"
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Text="&#xE710; Match"
+                        TextColor="{StaticResource MrbUNBlue}"
+                        VerticalOptions="Center" />
+
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding ChangeModeCommand}"
+                        CommandParameter="SaveVariant"
+                        FontAttributes="Bold"
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Text="&#xE710; Estimate"
+                        TextColor="{StaticResource MrbUNBlue}"
+                        VerticalOptions="Center" />
+
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding ChangeModeCommand}"
+                        CommandParameter="SaveVariant"
+                        FontAttributes="Bold"
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Text="&#xE710; Clear"
+                        TextColor="{StaticResource MrbUNBlue}"
+                        VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Grid>
+        </Frame>
+
+        <!--  Pallete Variants  -->
+        <Frame Grid.Row="3" />
+    </Grid>
+</ContentPage>

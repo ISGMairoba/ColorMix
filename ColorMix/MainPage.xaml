@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ColorMix.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ColorMix">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!--
+            <local:ColorToRGBConverter x:Key="ColorToRGBConverter"/>
+            -->
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout>
+            <CollectionView HorizontalOptions="Center" ItemsSource="{Binding Palettes}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="10,5" HeightRequest="185">
+
+                            <Grid
+                                Padding="0"
+                                ColumnDefinitions="*"
+                                RowDefinitions="30, *, auto">
+
+                                <!--  Title and icons  -->
+                                <Grid
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    ColumnDefinitions="*, 35,35,35"
+                                    RowDefinitions="*">
+
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="18"
+                                        HorizontalOptions="Start"
+                                        Style="{StaticResource PrimaryLabel}"
+                                        Text="{Binding PaletteName}"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="1"
+                                        FontFamily="IconFont"
+                                        FontSize="20"
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="&#xE80c;"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="2"
+                                        FontFamily="IconFont"
+                                        FontSize="20"
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="&#xf0c5;"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="3"
+                                        FontFamily="IconFont"
+                                        FontSize="20"
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="&#xf1e0;"
+                                        VerticalOptions="Center" />
+                                </Grid>
+
+                                <!--  Peview and Colors List  -->
+                                <Grid
+                                    Grid.Row="1"
+                                    Margin="0"
+                                    Padding="0"
+                                    ColumnDefinitions="120, *"
+                                    RowDefinitions="*,auto">
+                                    <RoundRectangle
+                                        Grid.Row="0"
+                                        Grid.RowSpan="2"
+                                        Grid.Column="0"
+                                        Margin="0,5,10,0"
+                                        Background="{Binding PaletteColor}"
+                                        CornerRadius="10"
+                                        HeightRequest="115"
+                                        HorizontalOptions="Start"
+                                        Stroke="{AppThemeBinding Dark=White,
+                                                                 Light=Black}"
+                                        StrokeThickness="5"
+                                        VerticalOptions="Center"
+                                        WidthRequest="115" />
+
+                                    <!--  Palette Varints  -->
+                                    <CollectionView
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="5"
+                                        HorizontalOptions="Start"
+                                        ItemsSource="{Binding PaletteColors}"
+                                        VerticalOptions="Center">
+                                        <CollectionView.ItemsLayout>
+
+                                            <!--  Orientation=Horizontal means horizontal scrolling; Span=2 means 2 rows  -->
+
+                                            <LinearItemsLayout ItemSpacing="5" Orientation="Horizontal" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Frame
+                                                    Margin="0"
+                                                    Padding="0"
+                                                    BackgroundColor="Transparent"
+                                                    BorderColor="Transparent"
+                                                    CornerRadius="0"
+                                                    HeightRequest="50"
+                                                    HorizontalOptions="Center"
+                                                    MaximumWidthRequest="65"
+                                                    VerticalOptions="Center">
+                                                    <Grid RowDefinitions="32, *" VerticalOptions="Center">
+                                                        <RoundRectangle
+                                                            BackgroundColor="{Binding Color}"
+                                                            CornerRadius="5"
+                                                            HeightRequest="30"
+                                                            HorizontalOptions="Center"
+                                                            Stroke="{AppThemeBinding Dark=White,
+                                                                                     Light=Black}"
+                                                            StrokeThickness="3"
+                                                            VerticalOptions="Center"
+                                                            WidthRequest="60" />
+
+                                                        <Label
+                                                            Grid.Row="1"
+                                                            Margin="0"
+                                                            FontAttributes="Bold"
+                                                            FontSize="9"
+                                                            HorizontalOptions="Center"
+                                                            LineBreakMode="MiddleTruncation"
+                                                            Style="{StaticResource SecondaryLabel}"
+                                                            Text="{Binding ColorName}"
+                                                            VerticalOptions="Center" />
+
+                                                    </Grid>
+                                                </Frame>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+
+                                    <!--  Palatte Colors  -->
+                                    <CollectionView
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Margin="5"
+                                        HorizontalOptions="Start"
+                                        ItemsSource="{Binding PaletteColors}"
+                                        VerticalOptions="Center">
+                                        <CollectionView.ItemsLayout>
+
+                                            <!--  Orientation=Horizontal means horizontal scrolling; Span=2 means 2 rows  -->
+
+                                            <LinearItemsLayout ItemSpacing="5" Orientation="Horizontal" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Frame
+                                                    Margin="0"
+                                                    Padding="0"
+                                                    BackgroundColor="Transparent"
+                                                    BorderColor="Transparent"
+                                                    CornerRadius="0"
+                                                    HeightRequest="60"
+                                                    HorizontalOptions="Center"
+                                                    MaximumWidthRequest="50"
+                                                    VerticalOptions="Center">
+                                                    <Grid RowDefinitions="*,auto, auto">
+                                                        <RoundRectangle
+                                                            BackgroundColor="{Binding Color}"
+                                                            CornerRadius="5"
+                                                            HeightRequest="30"
+                                                            HorizontalOptions="Center"
+                                                            Stroke="{AppThemeBinding Dark=White,
+                                                                                     Light=Black}"
+                                                            StrokeThickness="3"
+                                                            VerticalOptions="Center"
+                                                            WidthRequest="30" />
+                                                        <Label
+                                                            Grid.Row="1"
+                                                            Margin="0"
+                                                            FontAttributes="Bold"
+                                                            FontSize="9"
+                                                            HorizontalOptions="Center"
+                                                            LineBreakMode="MiddleTruncation"
+                                                            Style="{StaticResource SecondaryLabel}"
+                                                            Text="{Binding ColorName}"
+                                                            VerticalOptions="Center" />
+                                                        <Label
+                                                            Grid.Row="2"
+                                                            Margin="0"
+                                                            FontAttributes="Bold"
+                                                            FontSize="9"
+                                                            HorizontalOptions="Center"
+                                                            Style="{StaticResource SecondaryLabel}"
+                                                            Text="{Binding DisplayText}"
+                                                            VerticalOptions="Center" />
+                                                    </Grid>
+                                                </Frame>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Grid>
+
+                                <!--  Footers (Color Codes & delete Button)  -->
+                                <Grid
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Padding="0"
+                                    ColumnDefinitions="*, 25"
+                                    RowDefinitions="*">
+
+                                    <Label
+                                        Grid.Column="1"
+                                        FontFamily="IconFont"
+                                        FontSize="20"
+                                        HorizontalOptions="Center"
+                                        Text="&#xE80d;"
+                                        TextColor="{StaticResource MrbRed}"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        FontSize="12"
+                                        HorizontalOptions="Start"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="{Binding DisplayText}"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

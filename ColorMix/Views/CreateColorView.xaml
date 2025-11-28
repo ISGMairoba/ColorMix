@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ColorMix.Views.CreateColorView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:ColorMix.ViewModel"
+    Title="CreateColorView">
+
+    <ScrollView>
+        <Grid RowDefinitions="*, auto">
+            <VerticalStackLayout Spacing="20">
+                <Frame
+                    Padding="0"
+                    CornerRadius="50"
+                    HeightRequest="250"
+                    WidthRequest="250"
+                    HorizontalOptions="Center"
+                    Margin="0,20,0,0">
+                    <GraphicsView
+                        x:Name="ColorPreview"
+                        BackgroundColor="Transparent"
+                        Drawable="{Binding ColorDrawable}"
+                        HeightRequest="250"
+                        WidthRequest="250" />
+                </Frame>
+
+                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Margin="10,0" Spacing="10" HorizontalOptions="Center">
+                        <Button
+                            Command="{Binding ChangeModeCommand}"
+                            CommandParameter="RGB"
+                            FontSize="18"
+                            HeightRequest="45"
+                            Text="R G B"
+                            WidthRequest="90" />
+                        <Button
+                            Command="{Binding ChangeModeCommand}"
+                            CommandParameter="CMYK"
+                            FontSize="18"
+                            HeightRequest="45"
+                            Text="C M Y K"
+                            WidthRequest="90" />
+                    </HorizontalStackLayout>
+                    
+                    <!-- Color Name Input -->
+                    <Entry 
+                        Placeholder="Color Name"
+                        Text="{Binding ColorName}"
+                        Margin="20,0"
+                        FontSize="18"
+                        HorizontalTextAlignment="Center" />
+
+                    <!-- RGB Sliders -->
+                    <VerticalStackLayout IsVisible="{Binding IsRGBVisible}">
+                        <Label Text="{Binding RgbRed, StringFormat='Red: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="255"
+                            Minimum="0"
+                            ThumbColor="Red"
+                            Value="{Binding RgbRed}" />
+                            
+                        <Label Text="{Binding RgbGreen, StringFormat='Green: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="255"
+                            Minimum="0"
+                            ThumbColor="Green"
+                            Value="{Binding RgbGreen}" />
+                            
+                        <Label Text="{Binding RgbBlue, StringFormat='Blue: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="255"
+                            Minimum="0"
+                            ThumbColor="Blue"
+                            Value="{Binding RgbBlue}" />
+                    </VerticalStackLayout>
+
+                    <!-- CMYK Sliders -->
+                    <VerticalStackLayout IsVisible="{Binding IsCMYKVisible}">
+                        <Label Text="{Binding CmykCyan, StringFormat='Cyan: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="100"
+                            Minimum="0"
+                            ThumbColor="Cyan"
+                            Value="{Binding CmykCyan}" />
+                            
+                        <Label Text="{Binding CmykMagenta, StringFormat='Magenta: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="100"
+                            Minimum="0"
+                            ThumbColor="Magenta"
+                            Value="{Binding CmykMagenta}" />
+                            
+                        <Label Text="{Binding CmykYellow, StringFormat='Yellow: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="100"
+                            Minimum="0"
+                            ThumbColor="Yellow"
+                            Value="{Binding CmykYellow}" />
+                            
+                        <Label Text="{Binding CmykBlack, StringFormat='Black: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Slider
+                            Margin="20,0,20,10"
+                            Maximum="100"
+                            Minimum="0"
+                            ThumbColor="Black"
+                            Value="{Binding CmykBlack}" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+                
+                <!-- Action Buttons -->
+                <HorizontalStackLayout 
+                    Grid.Row="1" 
+                    Spacing="20" 
+                    HorizontalOptions="Center" 
+                    Margin="0,20,0,40">
+                    <Button 
+                        Text="Reset" 
+                        Command="{Binding ResetCommand}"
+                        WidthRequest="120"
+                        BackgroundColor="{StaticResource MrbRed}" />
+                    <Button 
+                        Text="Save" 
+                        Command="{Binding SaveCommand}"
+                        WidthRequest="120" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
+</ContentPage>

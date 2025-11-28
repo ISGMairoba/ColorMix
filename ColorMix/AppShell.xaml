@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ColorMix.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ColorMix"
+    xmlns:views="clr-namespace:ColorMix.Views"
+    Title="ColorMix"
+    Shell.FlyoutBehavior="{OnPlatform WinUI=Locked,
+                                      Android=Flyout,
+                                      iOS=Flyout}">
+
+    <ShellContent
+        Title="Palettes"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Icon="{AppThemeBinding Dark=palette_white.png,
+                               Light=palette_black.png}"
+        Route="MainPage" />
+    <ShellContent
+        Title="Colors"
+        ContentTemplate="{DataTemplate views:ColorsView}"
+        Icon="{AppThemeBinding Dark=brush_white.png,
+                               Light=brush_black.png}"
+        Route="ColorsView" />
+    <ShellContent
+        Title="Pick Color"
+        ContentTemplate="{DataTemplate views:PickColorView}"
+        Icon="{AppThemeBinding Dark=camera_white.png,
+                               Light=camera_black.png}"
+        Route="PickColorView" />
+    <ShellContent
+        Title="Create New Palette"
+        ContentTemplate="{DataTemplate views:CreatePaletteView}"
+        Icon="{AppThemeBinding Dark=magic_white.png,
+                               Light=magic_black.png}"
+        Route="CreatePaletteView" />
+    <ShellContent
+        Title="Create Colors"
+        ContentTemplate="{DataTemplate views:CreateColorView}"
+        Icon="{AppThemeBinding Dark=magic_white.png,
+                               Light=magic_black.png}"
+        Route="CreateColorsView" />
+
+</Shell>
