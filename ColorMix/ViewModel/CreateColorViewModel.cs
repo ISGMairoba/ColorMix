@@ -275,6 +275,10 @@ namespace ColorMix.ViewModel
             var newColor = Color.FromRgb(RgbRed, RgbGreen, RgbBlue);
             _colorDrawable.SetColor(newColor);
             OnPropertyChanged(nameof(ColorDrawable));
+            
+            // Sync text fields
+            UpdateHexString();
+            UpdateRgbString();
         }
 
         private void ConvertToRGB()
@@ -325,6 +329,96 @@ namespace ColorMix.ViewModel
             CmykBlack = (int)Math.Round(100 * k);
 
             _isUpdatingFromRGB = false;
+        }
+
+        private string _hexEntry;
+        public string HexEntry
+        {
+            get => _hexEntry;
+            set
+            {
+                if (_hexEntry == value) return;
+                _hexEntry = value;
+                OnPropertyChanged();
+                if (!_isUpdatingFromSliders)
+                    UpdateFromHex(value);
+            }
+        }
+
+        private string _rgbEntry;
+        public string RgbEntry
+        {
+            get => _rgbEntry;
+            set
+            {
+                if (_rgbEntry == value) return;
+                _rgbEntry = value;
+                OnPropertyChanged();
+                if (!_isUpdatingFromSliders)
+                    UpdateFromRgbString(value);
+            }
+        }
+
+        private bool _isUpdatingFromSliders;
+
+        private void UpdateFromHex(string hex)
+        {
+            if (string.IsNullOrEmpty(hex) || !hex.StartsWith("#")) return;
+
+            try
+            {
+                var color = Color.FromArgb(hex);
+                _isUpdatingFromCMYK = true; // Prevent circular updates
+                RgbRed = (int)(color.Red * 255);
+                RgbGreen = (int)(color.Green * 255);
+                RgbBlue = (int)(color.Blue * 255);
+                _isUpdatingFromCMYK = false;
+                
+                UpdateColor();
+                UpdateCmykSlider();
+                // UpdateRgbString(); // Handled by UpdateColor
+            }
+            catch
+            {
+                // Invalid hex, ignore
+            }
+        }
+
+        private void UpdateFromRgbString(string rgbString)
+        {
+            if (string.IsNullOrWhiteSpace(rgbString)) return;
+
+            var parts = rgbString.Split(',');
+            if (parts.Length != 3) return;
+
+            if (int.TryParse(parts[0].Trim(), out int r) &&
+                int.TryParse(parts[1].Trim(), out int g) &&
+                int.TryParse(parts[2].Trim(), out int b))
+            {
+                _isUpdatingFromCMYK = true;
+                RgbRed = Math.Clamp(r, 0, 255);
+                RgbGreen = Math.Clamp(g, 0, 255);
+                RgbBlue = Math.Clamp(b, 0, 255);
+                _isUpdatingFromCMYK = false;
+
+                UpdateColor();
+                UpdateCmykSlider();
+                // UpdateHexString(); // Handled by UpdateColor
+            }
+        }
+
+        private void UpdateHexString()
+        {
+            _isUpdatingFromSliders = true;
+            HexEntry = $"#{RgbRed:X2}{RgbGreen:X2}{RgbBlue:X2}";
+            _isUpdatingFromSliders = false;
+        }
+
+        private void UpdateRgbString()
+        {
+            _isUpdatingFromSliders = true;
+            RgbEntry = $"{RgbRed},{RgbGreen},{RgbBlue}";
+            _isUpdatingFromSliders = false;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

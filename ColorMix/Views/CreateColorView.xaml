@@ -7,9 +7,9 @@
     xmlns:vm="clr-namespace:ColorMix.ViewModel"
     Title="CreateColorView">
 
-    <ScrollView>
-        <Grid RowDefinitions="*, auto">
-            <VerticalStackLayout Spacing="20">
+    <Grid RowDefinitions="*, Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="20" Padding="0,0,0,20">
                 <Frame
                     Padding="0"
                     CornerRadius="50"
@@ -25,7 +25,36 @@
                         WidthRequest="250" />
                 </Frame>
 
+                <!-- Hex and RGB Inputs -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="RGB:" VerticalOptions="Center" FontAttributes="Bold"/>
+                        <Entry 
+                            Text="{Binding RgbEntry}" 
+                            Placeholder="R, G, B" 
+                            WidthRequest="150"
+                            HorizontalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="HEX:" VerticalOptions="Center" FontAttributes="Bold"/>
+                        <Entry 
+                            Text="{Binding HexEntry}" 
+                            Placeholder="#RRGGBB" 
+                            WidthRequest="150"
+                            HorizontalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
                 <VerticalStackLayout Spacing="10">
+                    
+                    <!-- Color Name Input -->
+                    <Entry 
+                        Placeholder="Color Name"
+                        Text="{Binding ColorName}"
+                        Margin="20,0"
+                        FontSize="18"
+                        HorizontalTextAlignment="Center" />
+
                     <HorizontalStackLayout Margin="10,0" Spacing="10" HorizontalOptions="Center">
                         <Button
                             Command="{Binding ChangeModeCommand}"
@@ -43,14 +72,6 @@
                             WidthRequest="90" />
                     </HorizontalStackLayout>
                     
-                    <!-- Color Name Input -->
-                    <Entry 
-                        Placeholder="Color Name"
-                        Text="{Binding ColorName}"
-                        Margin="20,0"
-                        FontSize="18"
-                        HorizontalTextAlignment="Center" />
-
                     <!-- RGB Sliders -->
                     <VerticalStackLayout IsVisible="{Binding IsRGBVisible}">
                         <Label Text="{Binding RgbRed, StringFormat='Red: {0}'}" Margin="20,0" FontAttributes="Bold"/>
@@ -113,24 +134,24 @@
                             Value="{Binding CmykBlack}" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-                
-                <!-- Action Buttons -->
-                <HorizontalStackLayout 
-                    Grid.Row="1" 
-                    Spacing="20" 
-                    HorizontalOptions="Center" 
-                    Margin="0,20,0,40">
-                    <Button 
-                        Text="Reset" 
-                        Command="{Binding ResetCommand}"
-                        WidthRequest="120"
-                        BackgroundColor="{StaticResource MrbRed}" />
-                    <Button 
-                        Text="Save" 
-                        Command="{Binding SaveCommand}"
-                        WidthRequest="120" />
-                </HorizontalStackLayout>
             </VerticalStackLayout>
-        </Grid>
-    </ScrollView>
+        </ScrollView>
+
+        <!-- Action Buttons -->
+        <HorizontalStackLayout 
+            Grid.Row="1" 
+            Spacing="20" 
+            HorizontalOptions="Center" 
+            Margin="0,20,0,20">
+            <Button 
+                Text="Reset" 
+                Command="{Binding ResetCommand}"
+                WidthRequest="120"
+                BackgroundColor="{StaticResource MrbRed}" />
+            <Button 
+                Text="Save" 
+                Command="{Binding SaveCommand}"
+                WidthRequest="120" />
+        </HorizontalStackLayout>
+    </Grid>
 </ContentPage>
