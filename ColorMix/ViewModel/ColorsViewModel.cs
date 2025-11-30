@@ -149,18 +149,7 @@ namespace ColorMix.ViewModel
 
                 foreach (var colorEntity in colors)
                 {
-                    var color = Color.FromRgb(colorEntity.Red, colorEntity.Green, colorEntity.Blue);
-                    var colorModel = new ColorsModel(color, colorEntity.ColorName, colorEntity.HexValue)
-                    {
-                        Id = colorEntity.Id,
-                        DateCreated = colorEntity.CreatedAt
-                    };
-                    // Hook up property changed for selection count
-                    colorModel.PropertyChanged += (s, e) => 
-                    {
-                        if (e.PropertyName == nameof(ColorsModel.IsSelected))
-                            OnPropertyChanged(nameof(SelectedCount));
-                    };
+                    var colorModel = CreateColorModel(colorEntity);
                     _allColors.Add(colorModel);
                 }
                 
@@ -233,8 +222,17 @@ namespace ColorMix.ViewModel
             }
 
             await _colorService.AddColorsAsync(newColors);
+            
+            // Local update: Add new colors to lists
+            foreach (var entity in newColors)
+            {
+                var model = CreateColorModel(entity);
+                _allColors.Add(model);
+                ColorList.Add(model);
+            }
+
             IsSelectionMode = false;
-            await LoadColorsAsync(); // Reload to show duplicates with new IDs
+            // Removed await LoadColorsAsync();
         }
 
         private async Task OnBatchShareAsync()
@@ -330,7 +328,12 @@ namespace ColorMix.ViewModel
                 };
 
                 await _colorService.AddColorAsync(newColor);
-                await LoadColorsAsync();
+                
+                // Local update
+                var model = CreateColorModel(newColor);
+                _allColors.Add(model);
+                ColorList.Add(model);
+
                 await Toast.Make($"Duplicated '{colorModel.ColorName}'").Show();
             }
             catch (Exception ex)
@@ -376,7 +379,11 @@ namespace ColorMix.ViewModel
                 if (confirm)
                 {
                     await _colorService.DeleteColorAsync(colorModel.Id);
-                    await LoadColorsAsync();
+                    
+                    // Local update
+                    _allColors.Remove(colorModel);
+                    ColorList.Remove(colorModel);
+
                     await Toast.Make($"Deleted '{colorModel.ColorName}'").Show();
                 }
             }
@@ -384,6 +391,23 @@ namespace ColorMix.ViewModel
             {
                 await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete color: {ex.Message}", "OK");
             }
+        }
+
+        private ColorsModel CreateColorModel(ColorEntity colorEntity)
+        {
+            var color = Color.FromRgb(colorEntity.Red, colorEntity.Green, colorEntity.Blue);
+            var colorModel = new ColorsModel(color, colorEntity.ColorName, colorEntity.HexValue)
+            {
+                Id = colorEntity.Id,
+                DateCreated = colorEntity.CreatedAt
+            };
+            // Hook up property changed for selection count
+            colorModel.PropertyChanged += (s, e) => 
+            {
+                if (e.PropertyName == nameof(ColorsModel.IsSelected))
+                    OnPropertyChanged(nameof(SelectedCount));
+            };
+            return colorModel;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
