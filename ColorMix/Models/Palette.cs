@@ -12,6 +12,8 @@ namespace ColorMix
         private string _paletteColorHex;
         private Color _paletteColor;
 
+        public int Id { get; set; }
+
         public string PaletteName
         {
             get => _paletteName;

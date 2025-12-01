@@ -4,11 +4,89 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:ColorMix"
+    xmlns:helpers="clr-namespace:ColorMix.Helpers"
     xmlns:vm="clr-namespace:ColorMix.ViewModel"
     Title="Create Palette">
 
     <ContentPage.Resources>
         <converters:ColorToRGBConverter x:Key="ColorToRGBConverter" />
+
+        <Style x:Key="CustomRadioButton" TargetType="RadioButton">
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="ControlTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Grid
+                            ColumnDefinitions="Auto, *"
+                            ColumnSpacing="6"
+                            VerticalOptions="Center">
+                            <!--  Outer Ring  -->
+                            <Border
+                                Grid.Column="0"
+                                BackgroundColor="Transparent"
+                                HeightRequest="20"
+                                HorizontalOptions="Center"
+                                Stroke="{TemplateBinding TextColor}"
+                                StrokeShape="RoundRectangle 10"
+                                StrokeThickness="2"
+                                VerticalOptions="Center"
+                                WidthRequest="20">
+                                <!--  Inner Circle (Check mark)  -->
+                                <BoxView
+                                    x:Name="CheckMark"
+                                    BackgroundColor="Transparent"
+                                    CornerRadius="5"
+                                    HeightRequest="10"
+                                    HorizontalOptions="Center"
+                                    Opacity="0"
+                                    VerticalOptions="Center"
+                                    WidthRequest="10"
+                                    Color="{TemplateBinding TextColor}" />
+                            </Border>
+
+                            <ContentPresenter
+                                Grid.Column="1"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CheckedStates">
+                                        <VisualState x:Name="Checked">
+                                            <VisualState.Setters>
+                                                <Setter TargetName="CheckMark" Property="BoxView.Opacity" Value="1" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Unchecked">
+                                            <VisualState.Setters>
+                                                <Setter TargetName="CheckMark" Property="BoxView.Opacity" Value="0" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CheckedStates">
+                        <VisualState x:Name="Checked">
+                            <VisualState.Setters>
+                                <Setter Property="TextColor" Value="{StaticResource MrbUNBlue}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Unchecked">
+                            <VisualState.Setters>
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
     </ContentPage.Resources>
 
     <!--  Toolbar in Shell.TitleView (top-right)  -->
@@ -28,45 +106,54 @@
                 Margin="15,0"
                 Spacing="15"
                 VerticalOptions="Center">
+
                 <!--  Save Palette  -->
-                <Label
-                    FontFamily="fontello"
-                    FontSize="24"
-                    Text="&#xe807;"
-                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
-                                                Dark={StaticResource White}}"
-                    VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SavePaletteCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
+                <ImageButton
+                    Command="{Binding SavePaletteCommand}"
+                    HeightRequest="25"
+                    VerticalOptions="Center"
+                    WidthRequest="30">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="fontello"
+                            Glyph="{x:Static helpers:FontIcons.SavePalette}"
+                            Size="24"
+                            Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                    Dark={StaticResource White}}" />
+                    </ImageButton.Source>
+                </ImageButton>
 
                 <!--  Add Color to Palette  -->
-                <Label
-                    FontAttributes="None"
-                    FontFamily="fontello"
-                    FontSize="24"
-                    Text="&#xf1fb;"
-                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
-                                                Dark={StaticResource White}}"
-                    VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding AddColorCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
+                <ImageButton
+                    Command="{Binding AddColorCommand}"
+                    HeightRequest="25"
+                    VerticalOptions="Center"
+                    WidthRequest="30">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="fontello"
+                            Glyph="{x:Static helpers:FontIcons.AddColor}"
+                            Size="24"
+                            Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                    Dark={StaticResource White}}" />
+                    </ImageButton.Source>
+                </ImageButton>
 
                 <!--  Remove Color from Palette  -->
-                <Label
-                    FontFamily="fontello"
-                    FontSize="24"
-                    Text="&#xe80d;"
-                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
-                                                Dark={StaticResource White}}"
-                    VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding RemoveColorCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
+                <ImageButton
+                    Command="{Binding RemoveColorCommand}"
+                    HeightRequest="25"
+                    VerticalOptions="Center"
+                    WidthRequest="30">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="fontello"
+                            Glyph="{x:Static helpers:FontIcons.RemoveColor}"
+                            Size="24"
+                            Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                    Dark={StaticResource White}}" />
+                    </ImageButton.Source>
+                </ImageButton>
             </HorizontalStackLayout>
         </Grid>
     </Shell.TitleView>
@@ -81,7 +168,11 @@
                     FontSize="16"
                     Text="Palette Colors" />
 
-                <CollectionView HeightRequest="80" ItemsSource="{Binding PaletteColors}">
+                <CollectionView
+                    HeightRequest="80"
+                    ItemsSource="{Binding PaletteColors}"
+                    SelectedItem="{Binding SelectedPaletteColor}"
+                    SelectionMode="Single">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal" />
                     </CollectionView.ItemsLayout>
@@ -109,6 +200,16 @@
                                     Text="{Binding HexValue}"
                                     TextColor="{AppThemeBinding Light={StaticResource Gray600},
                                                                 Dark={StaticResource Gray400}}" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal" />
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E0E0E0, Dark=#404040}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -127,9 +228,16 @@
                     <RadioButton
                         Content="RGB"
                         GroupName="BlendMode"
-                        IsChecked="True" />
-                    <RadioButton Content="LAB" GroupName="BlendMode" />
-                    <RadioButton Content="HLS" GroupName="BlendMode" />
+                        IsChecked="True"
+                        Style="{StaticResource CustomRadioButton}" />
+                    <RadioButton
+                        Content="LAB"
+                        GroupName="BlendMode"
+                        Style="{StaticResource CustomRadioButton}" />
+                    <RadioButton
+                        Content="HLS"
+                        GroupName="BlendMode"
+                        Style="{StaticResource CustomRadioButton}" />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Frame>

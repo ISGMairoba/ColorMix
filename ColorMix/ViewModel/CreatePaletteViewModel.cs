@@ -23,6 +23,25 @@ namespace ColorMix.ViewModel
             {
                 _selectedVariant = value;
                 OnPropertyChanged();
+                if (_selectedVariant != null)
+                {
+                    SelectedPaletteColor = null;
+                }
+            }
+        }
+
+        private ColorEntity _selectedPaletteColor;
+        public ColorEntity SelectedPaletteColor
+        {
+            get => _selectedPaletteColor;
+            set
+            {
+                _selectedPaletteColor = value;
+                OnPropertyChanged();
+                if (_selectedPaletteColor != null)
+                {
+                    SelectedVariant = null;
+                }
             }
         }
 
@@ -86,8 +105,6 @@ namespace ColorMix.ViewModel
 
         public CreatePaletteViewModel()
         {
-            // Manual injection for now as we don't have full DI setup in this snippet context
-            // In a real app, this should be injected via constructor
             var options = new DbContextOptionsBuilder<ColorMixDbContext>()
                 .UseSqlite($"Filename={Path.Combine(FileSystem.AppDataDirectory, "colormix.db")}")
                 .Options;
@@ -105,7 +122,6 @@ namespace ColorMix.ViewModel
             DecrementCommand = new Command<MixColor>(OnDecrement);
             AddColorToMixCommand = new Command<ColorEntity>(OnAddColorToMix);
 
-            // Initialize async without blocking
             InitializeAsync();
         }
 
@@ -119,9 +135,7 @@ namespace ColorMix.ViewModel
             }
             catch (Exception ex)
             {
-                // Log error but don't crash
                 System.Diagnostics.Debug.WriteLine($"Error initializing CreatePaletteViewModel: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -133,7 +147,6 @@ namespace ColorMix.ViewModel
             {
                 PaletteColors.Add(color);
             }
-            // No dummy data - user builds palette from scratch
         }
 
         private async Task LoadVariantsAsync()
@@ -142,7 +155,7 @@ namespace ColorMix.ViewModel
             var variants = await _dbContext.PaletteVariants.Include(v => v.Components).ToListAsync();
             foreach (var v in variants)
             {
-                var p = new Palette(v.Name, v.HexColor, Color.FromArgb(v.HexColor));
+                var p = new Palette(v.Name, v.HexColor, Color.FromArgb(v.HexColor)) { Id = v.Id };
                 foreach (var c in v.Components)
                 {
                     p.PaletteColors.Add(new MixColor(c.ColorName, Color.FromArgb(c.HexColor), c.Percentage, c.Ratio));
@@ -151,13 +164,10 @@ namespace ColorMix.ViewModel
             }
         }
 
-
-
         private async void OnAddColor()
         {
             try
             {
-                // Get all colors from database
                 var allColors = await _dbContext.Colors.ToListAsync();
                 
                 if (!allColors.Any())
@@ -169,18 +179,20 @@ namespace ColorMix.ViewModel
                     return;
                 }
 
-                // Show action sheet with color names
-                var colorNames = allColors.Select(c => c.ColorName).ToArray();
-                string selectedColorName = await MainThread.InvokeOnMainThreadAsync(async () =>
+                var popup = new Views.ColorSelectionPopup(allColors);
+                await Application.Current.MainPage.Navigation.PushModalAsync(popup);
+                
+                // Wait for popup to close and check if color was selected
+                await Task.Delay(100); // Small delay to ensure modal is shown
+                
+                // The popup will close itself when a color is selected
+                // We need to wait for it to close and then check the result
+                while (Application.Current.MainPage.Navigation.ModalStack.Contains(popup))
                 {
-                    return await Application.Current.MainPage.DisplayActionSheet("Select Color to Add", "Cancel", null, colorNames);
-                });
-
-                if (string.IsNullOrEmpty(selectedColorName) || selectedColorName == "Cancel")
-                    return;
-
-                // Find the selected color
-                var selectedColor = allColors.FirstOrDefault(c => c.ColorName == selectedColorName);
+                    await Task.Delay(100);
+                }
+                
+                var selectedColor = popup.SelectedColor;
                 if (selectedColor != null && !PaletteColors.Any(p => p.ColorName == selectedColor.ColorName))
                 {
                     PaletteColors.Add(selectedColor);
@@ -207,20 +219,44 @@ namespace ColorMix.ViewModel
             }
         }
 
-        private void OnRemoveColor()
+        private async void OnRemoveColor()
         {
-            if (PaletteColors.Any())
+            bool deleted = false;
+            if (SelectedPaletteColor != null)
             {
-                var colorToRemove = PaletteColors.Last();
+                var colorToRemove = SelectedPaletteColor;
                 PaletteColors.Remove(colorToRemove);
                 
-                // Also remove from mix if present
                 var mixItem = MixComponents.FirstOrDefault(m => m.ColorName == colorToRemove.ColorName);
                 if (mixItem != null)
                 {
                     MixComponents.Remove(mixItem);
                     RecalculateMix();
                 }
+                SelectedPaletteColor = null;
+                deleted = true;
+                await MainThread.InvokeOnMainThreadAsync(() => Toast.Make($"Removed {colorToRemove.ColorName}").Show());
+            }
+            else if (SelectedVariant != null)
+            {
+                var variantToRemove = SelectedVariant;
+                if (variantToRemove.Id > 0)
+                {
+                    var entity = await _dbContext.PaletteVariants.FindAsync(variantToRemove.Id);
+                    if (entity != null)
+                    {
+                        _dbContext.PaletteVariants.Remove(entity);
+                        await _dbContext.SaveChangesAsync();
+                    }
+                }
+                Variants.Remove(variantToRemove);
+                SelectedVariant = null;
+                deleted = true;
+                await MainThread.InvokeOnMainThreadAsync(() => Toast.Make($"Removed {variantToRemove.PaletteName}").Show());
+            }
+            else
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => Toast.Make("Select a color or variant to delete").Show());
             }
         }
 
@@ -238,7 +274,7 @@ namespace ColorMix.ViewModel
                 MixComponents.Add(new MixColor(
                     color.ColorName,
                     Color.FromRgb(color.Red, color.Green, color.Blue),
-                    0, // Percentage calculated later
+                    0, 
                     1.0
                 ));
             }
@@ -296,32 +332,31 @@ namespace ColorMix.ViewModel
                     HexColor = MixedColor.ToHex()
                 };
 
-            foreach (var comp in MixComponents)
-            {
-                variantEntity.Components.Add(new PaletteComponentEntity
+                foreach (var comp in MixComponents)
                 {
-                    ColorName = comp.ColorName,
-                    HexColor = comp.Color.ToHex(),
-                    Ratio = comp.Ratio,
-                    Percentage = comp.Percentage
+                    variantEntity.Components.Add(new PaletteComponentEntity
+                    {
+                        ColorName = comp.ColorName,
+                        HexColor = comp.Color.ToHex(),
+                        Ratio = comp.Ratio,
+                        Percentage = comp.Percentage
+                    });
+                }
+
+                _dbContext.PaletteVariants.Add(variantEntity);
+                await _dbContext.SaveChangesAsync();
+
+                var variant = new Palette(name, MixedColor.ToHex(), MixedColor) { Id = variantEntity.Id };
+                foreach (var comp in MixComponents)
+                {
+                    variant.PaletteColors.Add(comp);
+                }
+                Variants.Add(variant);
+                
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Toast.Make("Variant Saved Successfully").Show();
                 });
-            }
-
-            _dbContext.PaletteVariants.Add(variantEntity);
-            await _dbContext.SaveChangesAsync();
-
-            // Add to UI list
-            var variant = new Palette(name, MixedColor.ToHex(), MixedColor);
-            foreach (var comp in MixComponents)
-            {
-                variant.PaletteColors.Add(comp);
-            }
-            Variants.Add(variant);
-            
-            await MainThread.InvokeOnMainThreadAsync(() =>
-            {
-                Toast.Make("Variant Saved Successfully").Show();
-            });
             }
             catch (Exception ex)
             {
@@ -335,25 +370,55 @@ namespace ColorMix.ViewModel
 
         private async void OnSavePalette()
         {
-            try
+            if (!PaletteColors.Any())
             {
-                string paletteName = await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    return await Application.Current.MainPage.DisplayPromptAsync("Save Palette", "Enter Palette Name:");
-                });
-
-                if (string.IsNullOrWhiteSpace(paletteName)) return;
-
-                // TODO: Implement full palette saving logic
-                // This will save:
-                // 1. Palette name
-                // 2. All colors in PaletteColors
-                // 3. All variants with their components
-                
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await Application.Current.MainPage.DisplayAlert("Info", "Save Palette functionality will be implemented to save the entire palette including all variants and colors.", "OK");
-                    Toast.Make($"Palette '{paletteName}' save initiated").Show();
+                    await Application.Current.MainPage.DisplayAlert("Error", "No colors in palette to save", "OK");
+                });
+                return;
+            }
+
+            string name = await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                return await Application.Current.MainPage.DisplayPromptAsync("Save Palette", "Enter Palette Name:");
+            });
+
+            if (string.IsNullOrWhiteSpace(name)) return;
+
+            try
+            {
+                var savedPalette = new SavedPaletteEntity
+                {
+                    Name = name,
+                    DateCreated = DateTime.UtcNow
+                };
+
+                foreach (var color in PaletteColors)
+                {
+                    savedPalette.Colors.Add(new SavedPaletteColorEntity
+                    {
+                        ColorName = color.ColorName,
+                        HexValue = color.HexValue
+                    });
+                }
+
+                _dbContext.SavedPalettes.Add(savedPalette);
+                await _dbContext.SaveChangesAsync();
+
+                foreach (var variantModel in Variants)
+                {
+                    var variantEntity = await _dbContext.PaletteVariants.FindAsync(variantModel.Id);
+                    if (variantEntity != null)
+                    {
+                        variantEntity.SavedPaletteId = savedPalette.Id;
+                    }
+                }
+                await _dbContext.SaveChangesAsync();
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Toast.Make("Palette Saved Successfully").Show();
                 });
             }
             catch (Exception ex)
@@ -365,7 +430,6 @@ namespace ColorMix.ViewModel
                 });
             }
         }
-
 
         private async void OnMatch()
         {
@@ -394,8 +458,6 @@ namespace ColorMix.ViewModel
                 return;
             }
 
-            // Simple Hill Climbing Algorithm
-            // Initialize with equal ratios
             MixComponents.Clear();
             foreach (var color in PaletteColors)
             {
@@ -415,7 +477,6 @@ namespace ColorMix.ViewModel
 
                 foreach (var comp in MixComponents)
                 {
-                    // Try increasing
                     comp.Ratio++;
                     RecalculateMix();
                     double newDiff = ColorDistance(MixedColor, target);
@@ -428,11 +489,9 @@ namespace ColorMix.ViewModel
                     }
                     else
                     {
-                        // Revert
                         comp.Ratio--;
                     }
 
-                    // Try decreasing
                     if (comp.Ratio > 0)
                     {
                         comp.Ratio--;
@@ -447,20 +506,18 @@ namespace ColorMix.ViewModel
                         }
                         else
                         {
-                            // Revert
                             comp.Ratio++;
                         }
                     }
                 }
             }
             
-            RecalculateMix(); // Ensure final state is consistent
+            RecalculateMix();
             Toast.Make($"Matched with difference: {currentDiff:F2}").Show();
         }
 
         private double ColorDistance(Color c1, Color c2)
         {
-            // Simple Euclidean distance in RGB
             return Math.Sqrt(
                 Math.Pow(c1.Red - c2.Red, 2) +
                 Math.Pow(c1.Green - c2.Green, 2) +
@@ -473,7 +530,7 @@ namespace ColorMix.ViewModel
             string result = await Application.Current.MainPage.DisplayPromptAsync("Estimate Quantity", "Enter Total Quantity (e.g., 10 Liters):", "Calculate", "Cancel", keyboard: Keyboard.Numeric);
             if (string.IsNullOrWhiteSpace(result) || !double.TryParse(result, out double totalQuantity))
             {
-                if (result != null) // Only show error if not cancelled
+                if (result != null)
                     await Application.Current.MainPage.DisplayAlert("Error", "Invalid Quantity", "OK");
                 return;
             }
@@ -503,7 +560,6 @@ namespace ColorMix.ViewModel
 
         private void OnChangeMode(string parameter)
         {
-             // Handle button clicks from the view if they use this command
              if (parameter == "SaveVariant") OnSaveVariant();
              else if (parameter == "Match") OnMatch();
              else if (parameter == "Estimate") OnEstimate();
@@ -540,7 +596,6 @@ namespace ColorMix.ViewModel
             g /= totalRatio;
             b /= totalRatio;
 
-            // Clamp values
             r = Math.Clamp(r, 0, 1);
             g = Math.Clamp(g, 0, 1);
             b = Math.Clamp(b, 0, 1);

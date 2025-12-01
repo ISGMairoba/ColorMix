@@ -18,5 +18,10 @@ namespace ColorMix.Data.Entities
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         public virtual ICollection<PaletteComponentEntity> Components { get; set; } = new List<PaletteComponentEntity>();
+
+        public int? SavedPaletteId { get; set; }
+        
+        [ForeignKey(nameof(SavedPaletteId))]
+        public virtual SavedPaletteEntity SavedPalette { get; set; }
     }
 }

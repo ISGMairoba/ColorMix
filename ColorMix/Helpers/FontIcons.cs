@@ -11,5 +11,8 @@ namespace ColorMix.Helpers
         public const string Edit = "\ue80c"; // Existing in code
         public const string Share = "\uf1e0"; // Existing in code
         public const string Close = "\xf00d"; // Existing in code
+        public const string SavePalette = "\ue807";
+        public const string AddColor = "\uf1fb";
+        public const string RemoveColor = "\ue80d";
     }
 }
