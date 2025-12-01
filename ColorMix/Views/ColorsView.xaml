@@ -1,181 +1,197 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
+    x:Class="ColorMix.Views.ColorsView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:helpers="clr-namespace:ColorMix.Helpers"
     xmlns:models="clr-namespace:ColorMix.Models"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    xmlns:helpers="clr-namespace:ColorMix.Helpers"
-    x:Class="ColorMix.Views.ColorsView"
     Title="ColorsView">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*, Auto" Padding="0,0,10,0">
-            <!-- Normal Toolbar -->
-            <Grid 
-                Grid.Column="0" 
+        <Grid Padding="0,0,10,0" ColumnDefinitions="*, Auto">
+            <!--  Normal Toolbar  -->
+            <Grid
+                Grid.Column="0"
                 Grid.ColumnSpan="2"
-                ColumnDefinitions="*, Auto, Auto, Auto" 
+                ColumnDefinitions="*, Auto, Auto, Auto"
                 ColumnSpacing="15"
                 IsVisible="{Binding IsSelectionMode, Converter={toolkit:InvertedBoolConverter}}">
-                
-                <!-- Title / Search Bar -->
-                <Grid Grid.Column="0">
-                    <Label 
-                        Text="Colors" 
-                        FontSize="20" 
-                        FontAttributes="Bold" 
-                        VerticalOptions="Center" 
-                        TextColor="{AppThemeBinding Light=Black, Dark=White}"
-                        IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}"/>
 
-                    <SearchBar 
-                        Placeholder="Search..." 
-                        Text="{Binding SearchText}" 
-                        VerticalOptions="Center"
+                <!--  Title / Search Bar  -->
+                <Grid Grid.Column="0">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}"
+                        Text="Colors"
+                        TextColor="{AppThemeBinding Light=Black,
+                                                    Dark=White}"
+                        VerticalOptions="Center" />
+
+                    <SearchBar
                         BackgroundColor="Transparent"
-                        IsVisible="{Binding IsSearching}"/>
+                        IsVisible="{Binding IsSearching}"
+                        Placeholder="Search..."
+                        Text="{Binding SearchText}"
+                        VerticalOptions="Center" />
                 </Grid>
 
-                <!-- Search Icon -->
+                <!--  Search Icon  -->
                 <ImageButton
                     Grid.Column="1"
                     Command="{Binding ToggleSearchCommand}"
-                    HeightRequest="30"
-                    WidthRequest="30"
-                    VerticalOptions="Center">
+                    HeightRequest="20"
+                    VerticalOptions="Center"
+                    WidthRequest="30">
                     <ImageButton.Source>
-                        <FontImageSource 
-                            FontFamily="IconFont" 
-                            Glyph="{x:Static helpers:FontIcons.Search}" 
-                            Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="14"/>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{x:Static helpers:FontIcons.Search}"
+                            Size="36"
+                            Color="{AppThemeBinding Light=Black,
+                                                    Dark=White}" />
                     </ImageButton.Source>
                     <ImageButton.Triggers>
-                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsSearching}" Value="True">
+                        <DataTrigger
+                            Binding="{Binding IsSearching}"
+                            TargetType="ImageButton"
+                            Value="True">
                             <Setter Property="Source">
                                 <Setter.Value>
-                                    <FontImageSource 
-                                        FontFamily="IconFont" 
-                                        Glyph="{x:Static helpers:FontIcons.SearchCancel}" 
-                                        Color="{AppThemeBinding Light=Black, Dark=White}" 
-                                        Size="14"/>
+                                    <FontImageSource
+                                        FontFamily="IconFont"
+                                        Glyph="{x:Static helpers:FontIcons.SearchCancel}"
+                                        Size="36"
+                                        Color="{AppThemeBinding Light=Black,
+                                                                Dark=White}" />
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
                     </ImageButton.Triggers>
                 </ImageButton>
 
-                <!-- Sort Icon -->
+                <!--  Sort Icon  -->
                 <ImageButton
                     Grid.Column="2"
                     Command="{Binding OpenSortCommand}"
-                    HeightRequest="30"
-                    WidthRequest="30"
+                    HeightRequest="20"
+                    IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}"
                     VerticalOptions="Center"
-                    IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
+                    WidthRequest="30">
                     <ImageButton.Source>
-                        <FontImageSource 
-                            FontFamily="IconFont" 
-                            Glyph="{x:Static helpers:FontIcons.Sort}" 
-                            Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="14"/>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{x:Static helpers:FontIcons.Sort}"
+                            Size="36"
+                            Color="{AppThemeBinding Light=Black,
+                                                    Dark=White}" />
                     </ImageButton.Source>
                 </ImageButton>
 
-                <!-- Select Icon -->
+                <!--  Select Icon  -->
                 <ImageButton
                     Grid.Column="3"
                     Command="{Binding ToggleSelectionModeCommand}"
-                    HeightRequest="30"
-                    WidthRequest="30"
+                    HeightRequest="20"
+                    IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}"
                     VerticalOptions="Center"
-                    IsVisible="{Binding IsSearching, Converter={toolkit:InvertedBoolConverter}}">
+                    WidthRequest="30">
                     <ImageButton.Source>
-                        <FontImageSource 
-                            FontFamily="IconFont" 
-                            Glyph="{x:Static helpers:FontIcons.Selection}" 
-                            Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="14"/>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{x:Static helpers:FontIcons.Selection}"
+                            Size="36"
+                            Color="{AppThemeBinding Light=Black,
+                                                    Dark=White}" />
                     </ImageButton.Source>
                 </ImageButton>
             </Grid>
 
-            <!-- Selection Mode Toolbar -->
-            <Grid 
-                Grid.Column="1" 
-                ColumnDefinitions="Auto, Auto, Auto, Auto, Auto, Auto" 
-                ColumnSpacing="15"
+            <!--  Selection Mode Toolbar  -->
+            <Grid
+                Grid.Column="1"
+                ColumnDefinitions="*, Auto, Auto, Auto, Auto, Auto"
+                ColumnSpacing="10"
                 IsVisible="{Binding IsSelectionMode}">
-                
-                <Button 
-                    Grid.Column="0" 
-                    Text="Cancel" 
-                    Command="{Binding ToggleSelectionModeCommand}" 
-                    BackgroundColor="Transparent" 
-                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
-                    FontAttributes="Bold"
-                    Padding="0"/>
 
-                <Button 
-                    Grid.Column="1" 
-                    Text="All" 
-                    Command="{Binding SelectAllCommand}" 
-                    BackgroundColor="Transparent" 
-                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                <Button
+                    Grid.Column="0"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    Command="{Binding ToggleSelectionModeCommand}"
                     FontAttributes="Bold"
-                    Padding="0"/>
+                    HorizontalOptions="End"
+                    Text="Cancel"
+                    TextColor="{AppThemeBinding Light=Black,
+                                                Dark=White}" />
 
-                <Button 
-                    Grid.Column="2" 
-                    Text="None" 
-                    Command="{Binding DeselectAllCommand}" 
-                    BackgroundColor="Transparent" 
-                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                <Button
+                    Grid.Column="1"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    Command="{Binding SelectAllCommand}"
                     FontAttributes="Bold"
-                    Padding="0"/>
+                    Text="All"
+                    TextColor="{AppThemeBinding Light=Black,
+                                                Dark=White}"
+                    WidthRequest="20" />
+
+                <Button
+                    Grid.Column="2"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    Command="{Binding DeselectAllCommand}"
+                    FontAttributes="Bold"
+                    Text="None"
+                    TextColor="{AppThemeBinding Light=Black,
+                                                Dark=White}"
+                    WidthRequest="30" />
 
                 <ImageButton
                     Grid.Column="3"
                     Command="{Binding BatchShareCommand}"
-                    HeightRequest="30"
-                    WidthRequest="30"
-                    VerticalOptions="Center">
+                    HeightRequest="20"
+                    VerticalOptions="Center"
+                    WidthRequest="22">
                     <ImageButton.Source>
-                        <FontImageSource 
-                            FontFamily="IconFont" 
-                            Glyph="{x:Static helpers:FontIcons.Share}" 
-                            Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="14"/>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{x:Static helpers:FontIcons.Share}"
+                            Size="36"
+                            Color="{AppThemeBinding Light=Black,
+                                                    Dark=White}" />
                     </ImageButton.Source>
                 </ImageButton>
 
                 <ImageButton
                     Grid.Column="4"
                     Command="{Binding BatchDuplicateCommand}"
-                    HeightRequest="30"
-                    WidthRequest="30"
-                    VerticalOptions="Center">
+                    HeightRequest="20"
+                    VerticalOptions="Center"
+                    WidthRequest="22">
                     <ImageButton.Source>
-                        <FontImageSource 
-                            FontFamily="IconFont" 
-                            Glyph="{x:Static helpers:FontIcons.Copy}" 
-                            Color="{AppThemeBinding Light=Black, Dark=White}" 
-                            Size="14"/>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{x:Static helpers:FontIcons.Copy}"
+                            Size="36"
+                            Color="{AppThemeBinding Light=Black,
+                                                    Dark=White}" />
                     </ImageButton.Source>
                 </ImageButton>
 
                 <ImageButton
                     Grid.Column="5"
                     Command="{Binding BatchDeleteCommand}"
-                    HeightRequest="30"
-                    WidthRequest="30"
-                    VerticalOptions="Center">
+                    HeightRequest="20"
+                    VerticalOptions="Center"
+                    WidthRequest="22">
                     <ImageButton.Source>
-                        <FontImageSource 
-                            FontFamily="IconFont" 
-                            Glyph="{x:Static helpers:FontIcons.Delete}" 
-                            Color="{StaticResource MrbRed}" 
-                            Size="14"/>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{x:Static helpers:FontIcons.Delete}"
+                            Size="36"
+                            Color="{StaticResource MrbRed}" />
                     </ImageButton.Source>
                 </ImageButton>
             </Grid>
@@ -188,27 +204,31 @@
             <CollectionView HorizontalOptions="Center" ItemsSource="{Binding ColorList}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:ColorsModel">
-                        <Frame Margin="10,5" HeightRequest="85" HasShadow="True" CornerRadius="10">
-                            <Grid RowDefinitions="25, *, 25" ColumnDefinitions="Auto, 80, *">
-                                
-                                <!-- Selection Checkbox -->
-                                <CheckBox 
-                                    Grid.Row="0" 
+                        <Frame
+                            Margin="10,5"
+                            CornerRadius="10"
+                            HasShadow="True"
+                            HeightRequest="95">
+                            <Grid ColumnDefinitions="Auto, 80, *" RowDefinitions="25, *, 25">
+
+                                <!--  Selection Checkbox  -->
+                                <CheckBox
+                                    Grid.Row="0"
                                     Grid.RowSpan="3"
                                     Grid.Column="0"
+                                    Margin="0,0,10,0"
                                     IsChecked="{Binding IsSelected}"
                                     IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsSelectionMode}"
-                                    VerticalOptions="Center"
-                                    Margin="0,0,10,0"/>
+                                    VerticalOptions="Center" />
 
-                                <!-- Top Action Buttons -->
+                                <!--  Top Action Buttons  -->
                                 <Grid
                                     Grid.Row="0"
                                     Grid.Column="2"
                                     ColumnDefinitions="*, 35,35,35"
-                                    RowDefinitions="*"
-                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsSelectionMode, Converter={toolkit:InvertedBoolConverter}}">
-                                    <!-- Edit Button -->
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsSelectionMode, Converter={toolkit:InvertedBoolConverter}}"
+                                    RowDefinitions="*">
+                                    <!--  Edit Button  -->
                                     <Label
                                         Grid.Column="1"
                                         FontFamily="IconFont"
@@ -218,12 +238,10 @@
                                         Text="&#xE80c;"
                                         VerticalOptions="Center">
                                         <Label.GestureRecognizers>
-                                            <TapGestureRecognizer 
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
-                                                CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}" CommandParameter="{Binding .}" />
                                         </Label.GestureRecognizers>
                                     </Label>
-                                    <!-- Duplicate Button -->
+                                    <!--  Duplicate Button  -->
                                     <Label
                                         Grid.Column="2"
                                         FontFamily="IconFont"
@@ -233,12 +251,10 @@
                                         Text="&#xf0c5;"
                                         VerticalOptions="Center">
                                         <Label.GestureRecognizers>
-                                            <TapGestureRecognizer 
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DuplicateCommand}"
-                                                CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DuplicateCommand}" CommandParameter="{Binding .}" />
                                         </Label.GestureRecognizers>
                                     </Label>
-                                    <!-- Share Button -->
+                                    <!--  Share Button  -->
                                     <Label
                                         Grid.Column="3"
                                         FontFamily="IconFont"
@@ -248,14 +264,12 @@
                                         Text="&#xf1e0;"
                                         VerticalOptions="Center">
                                         <Label.GestureRecognizers>
-                                            <TapGestureRecognizer 
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ShareCommand}"
-                                                CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ShareCommand}" CommandParameter="{Binding .}" />
                                         </Label.GestureRecognizers>
                                     </Label>
                                 </Grid>
-                                
-                                <!--Color Preview-->
+
+                                <!--  Color Preview  -->
                                 <RoundRectangle
                                     Grid.Row="0"
                                     Grid.RowSpan="3"
@@ -270,24 +284,24 @@
                                     StrokeThickness="3"
                                     VerticalOptions="Center"
                                     WidthRequest="70" />
-                               <!-- Name & Color Code-->
-                                <Grid 
+                                <!--  Name & Color Code  -->
+                                <Grid
                                     Grid.Row="0"
+                                    Grid.RowSpan="3"
                                     Grid.Column="2"
                                     HorizontalOptions="Start"
-                                    Grid.RowSpan="3"
                                     RowDefinitions="*, 30">
-                                   
+
                                     <Label
                                         Grid.Row="0"
                                         Grid.Column="1"
                                         FontAttributes="Bold"
-                                        FontSize="24"
+                                        FontSize="18"
                                         HorizontalOptions="Start"
+                                        LineBreakMode="HeadTruncation"
                                         Text="{Binding ColorName}"
-                                        VerticalOptions="Center"
-                                        LineBreakMode="HeadTruncation"/>
-                                    
+                                        VerticalOptions="Center" />
+
                                     <Label
                                         Grid.Row="1"
                                         Grid.Column="1"
@@ -298,21 +312,19 @@
                                         VerticalOptions="Start" />
 
                                 </Grid>
-                                <!-- Delete Button -->
+                                <!--  Delete Button  -->
                                 <Label
                                     Grid.Row="2"
                                     Grid.Column="2"
                                     FontFamily="IconFont"
                                     FontSize="20"
                                     HorizontalOptions="End"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsSelectionMode, Converter={toolkit:InvertedBoolConverter}}"
                                     Text="&#xE80d;"
                                     TextColor="{StaticResource MrbRed}"
-                                    VerticalOptions="Center"
-                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsSelectionMode, Converter={toolkit:InvertedBoolConverter}}">
+                                    VerticalOptions="Center">
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer 
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCommand}"
-                                            CommandParameter="{Binding .}" />
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" />
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>

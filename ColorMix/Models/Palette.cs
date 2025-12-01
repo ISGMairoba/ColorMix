@@ -34,9 +34,9 @@ namespace ColorMix
 
         public ObservableCollection<MixColor> PaletteColors { get; set; } = new();
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ColorMix.ViewModel"
+    xmlns:controls="clr-namespace:ColorMix.Controls"
     Title="CreateColorView">
 
     <Grid RowDefinitions="*, Auto">
@@ -25,35 +26,39 @@
                         WidthRequest="250" />
                 </Frame>
 
-                <!-- Hex and RGB Inputs -->
-                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                        <Label Text="RGB:" VerticalOptions="Center" FontAttributes="Bold"/>
-                        <Entry 
+                <!-- Hex and RGB Inputs Side-by-Side -->
+                <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                    <VerticalStackLayout Spacing="0">
+                        <Label Text="RGB" HorizontalOptions="Center" FontSize="12" TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}"/>
+                        <controls:LabelEntry 
                             Text="{Binding RgbEntry}" 
                             Placeholder="R, G, B" 
-                            WidthRequest="150"
-                            HorizontalTextAlignment="Center"/>
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                        <Label Text="HEX:" VerticalOptions="Center" FontAttributes="Bold"/>
-                        <Entry 
+                            FontSize="18"
+                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                            WidthRequest="150" />
+                    </VerticalStackLayout>
+                    
+                    <VerticalStackLayout Spacing="0">
+                        <Label Text="HEX" HorizontalOptions="Center" FontSize="12" TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}"/>
+                        <controls:LabelEntry 
                             Text="{Binding HexEntry}" 
                             Placeholder="#RRGGBB" 
-                            WidthRequest="150"
-                            HorizontalTextAlignment="Center"/>
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
+                            FontSize="18"
+                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                            WidthRequest="150" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
 
                 <VerticalStackLayout Spacing="10">
                     
                     <!-- Color Name Input -->
-                    <Entry 
+                    <controls:LabelEntry 
                         Placeholder="Color Name"
                         Text="{Binding ColorName}"
-                        Margin="20,0"
-                        FontSize="18"
-                        HorizontalTextAlignment="Center" />
+                        FontSize="24"
+                        HorizontalOptions="Center"
+                        TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                        WidthRequest="300" />
 
                     <HorizontalStackLayout Margin="10,0" Spacing="10" HorizontalOptions="Center">
                         <Button

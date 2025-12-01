@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ColorMix.Controls.LabelEntry"
+             x:Name="this">
+    <Grid>
+        <Label
+            x:Name="DisplayLabel"
+            Text="{Binding Text, Source={x:Reference this}}"
+            TextColor="{Binding TextColor, Source={x:Reference this}}"
+            FontSize="{Binding FontSize, Source={x:Reference this}}"
+            FontAttributes="Bold"
+            HorizontalTextAlignment="Center"
+            VerticalTextAlignment="Center"
+            IsVisible="True">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnLabelTapped" />
+            </Label.GestureRecognizers>
+        </Label>
+
+        <Entry
+            x:Name="EditEntry"
+            Text="{Binding Text, Source={x:Reference this}}"
+            TextColor="{Binding TextColor, Source={x:Reference this}}"
+            FontSize="{Binding FontSize, Source={x:Reference this}}"
+            Placeholder="{Binding Placeholder, Source={x:Reference this}}"
+            HorizontalTextAlignment="Center"
+            IsVisible="False"
+            Unfocused="OnEntryUnfocused"
+            Completed="OnEntryCompleted" />
+    </Grid>
+</ContentView>

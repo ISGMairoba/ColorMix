@@ -163,7 +163,7 @@ namespace ColorMix.ViewModel
         public int ColorId { get; set; }
         #endregion
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public CreateColorViewModel()
         {
@@ -360,23 +360,32 @@ namespace ColorMix.ViewModel
         }
 
         private bool _isUpdatingFromSliders;
+        private bool _isUpdatingFromHex;
 
         private void UpdateFromHex(string hex)
         {
-            if (string.IsNullOrEmpty(hex) || !hex.StartsWith("#")) return;
+            if (string.IsNullOrEmpty(hex)) return;
+
+            // Allow typing partial hex without reset
+            if (!hex.StartsWith("#")) return;
+            if (hex.Length < 7) return; // Wait for full hex code
 
             try
             {
                 var color = Color.FromArgb(hex);
                 _isUpdatingFromCMYK = true; // Prevent circular updates
+                _isUpdatingFromHex = true;
+                
                 RgbRed = (int)(color.Red * 255);
                 RgbGreen = (int)(color.Green * 255);
                 RgbBlue = (int)(color.Blue * 255);
+                
+                _isUpdatingFromHex = false;
                 _isUpdatingFromCMYK = false;
                 
                 UpdateColor();
                 UpdateCmykSlider();
-                // UpdateRgbString(); // Handled by UpdateColor
+                UpdateRgbString(); 
             }
             catch
             {
@@ -403,12 +412,14 @@ namespace ColorMix.ViewModel
 
                 UpdateColor();
                 UpdateCmykSlider();
-                // UpdateHexString(); // Handled by UpdateColor
+                UpdateHexString();
             }
         }
 
         private void UpdateHexString()
         {
+            if (_isUpdatingFromHex) return;
+
             _isUpdatingFromSliders = true;
             HexEntry = $"#{RgbRed:X2}{RgbGreen:X2}{RgbBlue:X2}";
             _isUpdatingFromSliders = false;

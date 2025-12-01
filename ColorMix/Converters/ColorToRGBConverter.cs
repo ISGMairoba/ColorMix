@@ -7,7 +7,7 @@ namespace ColorMix {
     public class ColorToRGBConverter : IValueConverter
     {
         // Convert Color to RGB string (for UI)
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is Color color)
             {
@@ -17,7 +17,7 @@ namespace ColorMix {
         }
 
         // Convert RGB string back to Color (for ViewModel)
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is string rgbString)
             {
