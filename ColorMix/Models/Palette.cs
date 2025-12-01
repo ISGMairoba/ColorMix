@@ -50,13 +50,50 @@ namespace ColorMix
     }
 
 
-    public class MixColor
+    public class MixColor : INotifyPropertyChanged
     {
+        private double _percentage;
+        private double _ratio;
+
         public string ColorName { get; set; }
         public Color Color { get; set; }
-        public double Percentage { get; set; }
-        public double Ratio { get; set; }
-        public string DisplayText => $"{Ratio} ({Percentage}%)";
+
+        public double Percentage
+        {
+            get => _percentage;
+            set
+            {
+                if (_percentage != value)
+                {
+                    _percentage = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DisplayText));
+                }
+            }
+        }
+
+        public double Ratio
+        {
+            get => _ratio;
+            set
+            {
+                if (_ratio != value)
+                {
+                    _ratio = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DisplayText));
+                }
+            }
+        }
+
+        public string DisplayText => $"{Ratio} ({Percentage:F1}%)";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public MixColor(string colorName, Color color, double percentage, double ratio)
         {

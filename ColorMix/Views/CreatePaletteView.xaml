@@ -3,187 +3,307 @@
     x:Class="ColorMix.Views.CreatePaletteView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="CreatePalette">
-    <Grid Margin="0" RowDefinitions="Auto, Auto, *, Auto">
-        <!--  Pallete Colors  -->
-        <Frame Grid.Row="0">
-            <Grid RowDefinitions="auto, *">
-                <Label
-                    Grid.Row="0"
-                    FontAttributes="Bold"
-                    FontSize="14"
-                    HorizontalOptions="Start"
-                    Style="{StaticResource SecondaryLabel}"
-                    Text="Palette Colors"
-                    VerticalOptions="Center" />
+    xmlns:converters="clr-namespace:ColorMix"
+    xmlns:vm="clr-namespace:ColorMix.ViewModel"
+    Title="Create Palette">
 
-                <!--  To be reviewed and Bind  -->
-                <CollectionView
-                    Grid.Row="1"
-                    Margin="5"
-                    HorizontalOptions="Start"
-                    ItemsSource="{Binding PaletteColors}">
+    <ContentPage.Resources>
+        <converters:ColorToRGBConverter x:Key="ColorToRGBConverter" />
+    </ContentPage.Resources>
+
+    <!--  Toolbar in Shell.TitleView (top-right)  -->
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*, Auto">
+            <Label
+                Grid.Column="0"
+                FontAttributes="Bold"
+                FontSize="20"
+                Text="Create Palette"
+                TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                            Dark={StaticResource White}}"
+                VerticalOptions="Center" />
+
+            <HorizontalStackLayout
+                Grid.Column="1"
+                Margin="15,0"
+                Spacing="15"
+                VerticalOptions="Center">
+                <!--  Save Palette  -->
+                <Label
+                    FontFamily="fontello"
+                    FontSize="24"
+                    Text="&#xe807;"
+                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                Dark={StaticResource White}}"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SavePaletteCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!--  Add Color to Palette  -->
+                <Label
+                    FontAttributes="None"
+                    FontFamily="fontello"
+                    FontSize="24"
+                    Text="&#xf1fb;"
+                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                Dark={StaticResource White}}"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AddColorCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!--  Remove Color from Palette  -->
+                <Label
+                    FontFamily="fontello"
+                    FontSize="24"
+                    Text="&#xe80d;"
+                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                Dark={StaticResource White}}"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RemoveColorCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.TitleView>
+
+    <!--  Main Content with proper ScrollView  -->
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, *, Auto">
+        <!--  Palette Colors  -->
+        <Frame Grid.Row="0">
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    Text="Palette Colors" />
+
+                <CollectionView HeightRequest="80" ItemsSource="{Binding PaletteColors}">
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout ItemSpacing="5" Orientation="Horizontal" />
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame
-                                Margin="0"
-                                Padding="0"
-                                BackgroundColor="Transparent"
-                                BorderColor="Transparent"
-                                CornerRadius="0"
-                                HeightRequest="60"
-                                HorizontalOptions="Center"
-                                MaximumWidthRequest="50"
-                                VerticalOptions="Center">
-                                <Grid RowDefinitions="*,auto, auto">
-                                    <RoundRectangle
-                                        BackgroundColor="{Binding Color}"
-                                        CornerRadius="5"
-                                        HeightRequest="30"
-                                        HorizontalOptions="Center"
-                                        Stroke="{AppThemeBinding Dark=White,
-                                                                 Light=Black}"
-                                        StrokeThickness="3"
-                                        VerticalOptions="Center"
-                                        WidthRequest="30" />
-                                    <Label
-                                        Grid.Row="1"
-                                        Margin="0"
-                                        FontAttributes="Bold"
-                                        FontSize="9"
-                                        HorizontalOptions="Center"
-                                        LineBreakMode="MiddleTruncation"
-                                        Style="{StaticResource SecondaryLabel}"
-                                        Text="{Binding ColorName}"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Row="2"
-                                        Margin="0"
-                                        FontAttributes="Bold"
-                                        FontSize="9"
-                                        HorizontalOptions="Center"
-                                        Style="{StaticResource SecondaryLabel}"
-                                        Text="{Binding DisplayText}"
-                                        VerticalOptions="Center" />
-                                </Grid>
-                            </Frame>
+                            <VerticalStackLayout Spacing="2">
+                                <VerticalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatePaletteViewModel}}, Path=AddColorToMixCommand}"
+                                        CommandParameter="{Binding .}"
+                                        NumberOfTapsRequired="2" />
+                                </VerticalStackLayout.GestureRecognizers>
+                                <BoxView
+                                    HeightRequest="40"
+                                    WidthRequest="40"
+                                    Color="{Binding HexValue}" />
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="10"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding ColorName}" />
+                                <Label
+                                    FontSize="8"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding HexValue}"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                Dark={StaticResource Gray400}}" />
+                            </VerticalStackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-            </Grid>
+            </VerticalStackLayout>
         </Frame>
 
         <!--  Blend Mode  -->
         <Frame Grid.Row="1">
-            <Grid RowDefinitions="auto, *">
+            <VerticalStackLayout Spacing="5">
                 <Label
-                    Grid.Row="0"
                     FontAttributes="Bold"
-                    FontSize="14"
-                    HorizontalOptions="Start"
-                    Style="{StaticResource SecondaryLabel}"
-                    Text="Blend Mode"
-                    VerticalOptions="Center" />
-                <HorizontalStackLayout Grid.Row="1" Spacing="10">
+                    FontSize="16"
+                    Text="Blend Mode" />
+                <HorizontalStackLayout Spacing="20">
                     <RadioButton
                         Content="RGB"
-                        FontAttributes="Bold"
-                        GroupName="BlendMode" />
-                    <RadioButton
-                        Content="LAB"
-                        FontAttributes="Bold"
-                        GroupName="BlendMode" />
-                    <RadioButton
-                        Content="HLS"
-                        FontAttributes="Bold"
-                        GroupName="BlendMode" />
+                        GroupName="BlendMode"
+                        IsChecked="True" />
+                    <RadioButton Content="LAB" GroupName="BlendMode" />
+                    <RadioButton Content="HLS" GroupName="BlendMode" />
                 </HorizontalStackLayout>
-            </Grid>
-
+            </VerticalStackLayout>
         </Frame>
 
         <!--  Mixed Color  -->
-        <Frame Grid.Row="2" VerticalOptions="Fill">
-            <Grid RowDefinitions="auto, * , Auto">
+        <Frame Grid.Row="2">
+            <Grid ColumnDefinitions="*" RowDefinitions="auto, *, Auto">
                 <Label
                     Grid.Row="0"
                     FontAttributes="Bold"
-                    FontSize="14"
-                    HorizontalOptions="Start"
-                    Style="{StaticResource SecondaryLabel}"
-                    Text="MIxed Color"
-                    VerticalOptions="Center" />
+                    FontSize="16"
+                    Text="Mixed Color" />
+
                 <Grid
                     Grid.Row="1"
-                    Background="Aqua"
                     ColumnDefinitions="150, *"
-                    VerticalOptions="Fill">
-                    <RoundRectangle
-                        Grid.Row="0"
+                    ColumnSpacing="20">
+                    <!--  Preview Box  -->
+                    <BoxView
                         Grid.Column="0"
-                        Background="Yellow"
-                        CornerRadius="10"
+                        Margin="0,5"
                         HeightRequest="150"
-                        Stroke="{AppThemeBinding Dark=White,
-                                                 Light=Black}"
-                        StrokeThickness="5"
                         VerticalOptions="Start"
-                        WidthRequest="150" />
+                        WidthRequest="150"
+                        Color="{Binding MixedColor}" />
+
+                    <!--  Composition List  -->
+                    <ScrollView Grid.Column="1" VerticalOptions="Start">
+                        <CollectionView ItemsSource="{Binding MixComponents}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid
+                                        Margin="0,1"
+                                        ColumnDefinitions="Auto, Auto, Auto, *"
+                                        ColumnSpacing="10">
+
+                                        <Label
+                                            Grid.Column="0"
+                                            FontAttributes="Bold"
+                                            FontSize="24"
+                                            Text="-"
+                                            TextColor="{StaticResource MrbUNBlue}"
+                                            VerticalOptions="Center"
+                                            WidthRequest="20">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatePaletteViewModel}}, Path=DecrementCommand}" CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                        <BoxView
+                                            Grid.Column="1"
+                                            HeightRequest="20"
+                                            VerticalOptions="Center"
+                                            WidthRequest="20"
+                                            Color="{Binding Color}" />
+                                        <Label
+                                            Grid.Column="2"
+                                            FontAttributes="Bold"
+                                            FontSize="24"
+                                            Text="+"
+                                            TextColor="{StaticResource MrbUNBlue}"
+                                            VerticalOptions="Center"
+                                            WidthRequest="20">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatePaletteViewModel}}, Path=IncrementCommand}" CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                        <Label
+                                            Grid.Column="3"
+                                            FontAttributes="Bold"
+                                            FontSize="14"
+                                            Text="{Binding DisplayText}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </ScrollView>
                 </Grid>
+
+                <!--  Action Buttons  -->
                 <HorizontalStackLayout
                     Grid.Row="2"
+                    Margin="0"
                     Padding="0"
-                    Spacing="0">
+                    HeightRequest="35"
+                    HorizontalOptions="Start"
+                    Spacing="15">
                     <Button
+                        Padding="0"
                         BackgroundColor="Transparent"
-                        Command="{Binding ChangeModeCommand}"
-                        CommandParameter="SaveVariant"
-                        FontAttributes="Bold"
-                        HorizontalOptions="Center"
-                        Text="&#xE710; Save Variant"
-                        TextColor="{StaticResource MrbUNBlue}"
-                        VerticalOptions="Center" />
-
+                        Command="{Binding SaveVariantCommand}"
+                        FontAttributes="None"
+                        FontFamily="fontello"
+                        Text="&#xe80b; Save Variant"
+                        TextColor="{StaticResource MrbUNBlue}" />
                     <Button
+                        Padding="0"
                         BackgroundColor="Transparent"
-                        Command="{Binding ChangeModeCommand}"
-                        CommandParameter="SaveVariant"
-                        FontAttributes="Bold"
-                        FontSize="12"
-                        HorizontalOptions="Center"
-                        Text="&#xE710; Match"
-                        TextColor="{StaticResource MrbUNBlue}"
-                        VerticalOptions="Center" />
-
+                        Command="{Binding MatchCommand}"
+                        FontAttributes="None"
+                        FontFamily="fontello"
+                        Text="&#xe800; Match"
+                        TextColor="{StaticResource MrbUNBlue}" />
                     <Button
+                        Padding="0"
                         BackgroundColor="Transparent"
-                        Command="{Binding ChangeModeCommand}"
-                        CommandParameter="SaveVariant"
-                        FontAttributes="Bold"
-                        FontSize="12"
-                        HorizontalOptions="Center"
-                        Text="&#xE710; Estimate"
-                        TextColor="{StaticResource MrbUNBlue}"
-                        VerticalOptions="Center" />
-
+                        Command="{Binding EstimateCommand}"
+                        FontAttributes="None"
+                        FontFamily="fontello"
+                        Text="&#xe808; Estimate"
+                        TextColor="{StaticResource MrbUNBlue}" />
                     <Button
+                        Padding="0"
                         BackgroundColor="Transparent"
-                        Command="{Binding ChangeModeCommand}"
-                        CommandParameter="SaveVariant"
-                        FontAttributes="Bold"
-                        FontSize="12"
-                        HorizontalOptions="Center"
-                        Text="&#xE710; Clear"
-                        TextColor="{StaticResource MrbUNBlue}"
-                        VerticalOptions="Center" />
+                        Command="{Binding ClearCommand}"
+                        FontAttributes="None"
+                        FontFamily="fontello"
+                        Text="&#xe80e; Clear"
+                        TextColor="{StaticResource MrbUNBlue}" />
                 </HorizontalStackLayout>
             </Grid>
         </Frame>
 
-        <!--  Pallete Variants  -->
-        <Frame Grid.Row="3" />
+        <!--  Variants  -->
+        <Frame Grid.Row="3" Margin="10,5,10,10">
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    Text="Variants" />
+
+                <CollectionView
+                    HeightRequest="100"
+                    ItemsSource="{Binding Variants}"
+                    SelectedItem="{Binding SelectedVariant}"
+                    SelectionMode="Single">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Spacing="2">
+                                <BoxView
+                                    CornerRadius="5"
+                                    HeightRequest="40"
+                                    WidthRequest="40"
+                                    Color="{Binding PaletteColor}" />
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="10"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding PaletteName}" />
+                                <Label
+                                    FontSize="8"
+                                    HorizontalOptions="Center"
+                                    Text="{Binding PaletteColorHex}"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                Dark={StaticResource Gray400}}" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal" />
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Frame>
+
     </Grid>
 </ContentPage>

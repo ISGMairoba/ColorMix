@@ -9,7 +9,6 @@
         <Setter Property="Padding" Value="10,5" />
         <Setter Property="Margin" Value="10,5" />
         <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource MrbSpaceCadet}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource MrbSpaceCadet}}" />
     </Style>
