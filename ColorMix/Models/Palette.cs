@@ -32,7 +32,16 @@ namespace ColorMix
             set { _paletteColor = value; OnPropertyChanged(); }
         }
 
-        public string DisplayText => $"RGB({(int)(PaletteColor.Red * 255)}, {(int)(PaletteColor.Green * 255)}, {(int)(PaletteColor.Blue * 255)}) {PaletteColorHex}";
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(); }
+        }
+
+        public string DisplayText => PaletteColor != null 
+            ? $"RGB({(int)(PaletteColor.Red * 255)}, {(int)(PaletteColor.Green * 255)}, {(int)(PaletteColor.Blue * 255)}) {PaletteColorHex}"
+            : PaletteColorHex ?? "N/A";
 
         public ObservableCollection<MixColor> PaletteColors { get; set; } = new();
         public ObservableCollection<Palette> Variants { get; set; } = new();

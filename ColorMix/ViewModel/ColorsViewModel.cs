@@ -17,6 +17,7 @@ namespace ColorMix.ViewModel
         private List<ColorsModel> _allColors = new(); // Store all colors for filtering
         private string _searchText = string.Empty;
         private SortOption _currentSortOption = SortOption.DateCreated;
+        private System.Threading.Timer _searchDebounceTimer;
 
         public ObservableCollection<ColorsModel> ColorList
         {
@@ -36,7 +37,15 @@ namespace ColorMix.ViewModel
                 if (_searchText == value) return;
                 _searchText = value;
                 OnPropertyChanged();
-                ApplySortAndFilter();
+                
+                // Debounce search to improve performance
+                _searchDebounceTimer?.Dispose();
+                _searchDebounceTimer = new System.Threading.Timer(
+                    _ => MainThread.BeginInvokeOnMainThread(() => ApplySortAndFilter()),
+                    null,
+                    750, // 750ms delay
+                    System.Threading.Timeout.Infinite
+                );
             }
         }
 
@@ -122,7 +131,9 @@ namespace ColorMix.ViewModel
             
             SelectAllCommand = new Command(() =>
             {
-                foreach (var color in ColorList) color.IsSelected = true;
+                // Smart toggle: if all are selected, deselect all; otherwise select all
+                bool allSelected = ColorList.All(c => c.IsSelected);
+                foreach (var color in ColorList) color.IsSelected = !allSelected;
                 OnPropertyChanged(nameof(SelectedCount));
             });
 

@@ -55,6 +55,8 @@ namespace ColorMix.ViewModel
         private Color _mixedColor = Colors.Gray;
         private string _blendMode = "RGB";
         private int? _currentPaletteId;
+        private string _pageTitle = "Create Palette";
+        private string _currentPaletteName = "";
 
         public ObservableCollection<ColorEntity> PaletteColors
         {
@@ -94,6 +96,12 @@ namespace ColorMix.ViewModel
             }
         }
 
+        public string PageTitle
+        {
+            get => _pageTitle;
+            set { _pageTitle = value; OnPropertyChanged(); }
+        }
+
         private readonly ColorMixDbContext _dbContext;
 
         public ICommand AddColorCommand { get; }
@@ -107,6 +115,7 @@ namespace ColorMix.ViewModel
         public ICommand IncrementCommand { get; }
         public ICommand DecrementCommand { get; }
         public ICommand AddColorToMixCommand { get; }
+        public ICommand LoadVariantCommand { get; }
 
         public CreatePaletteViewModel()
         {
@@ -126,6 +135,7 @@ namespace ColorMix.ViewModel
             IncrementCommand = new Command<MixColor>(OnIncrement);
             DecrementCommand = new Command<MixColor>(OnDecrement);
             AddColorToMixCommand = new Command<ColorEntity>(OnAddColorToMix);
+            LoadVariantCommand = new Command<Palette>(OnLoadVariant);
 
             InitializeAsync();
         }
@@ -144,30 +154,27 @@ namespace ColorMix.ViewModel
 
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.ContainsKey("PaletteId"))
+            if (query != null && query.ContainsKey("PaletteId") && query["PaletteId"] != null)
             {
-                if (int.TryParse(query["PaletteId"].ToString(), out int paletteId))
+                if (int.TryParse(query["PaletteId"].ToString(), out int paletteId) && paletteId > 0)
                 {
                     _currentPaletteId = paletteId;
                     await LoadPaletteAsync(paletteId);
+                    return;
                 }
             }
-            else
-            {
-                _currentPaletteId = null;
-                ResetState();
-            }
+            
+            // No valid palette ID, reset to create mode
+            _currentPaletteId = null;
+            PageTitle = "Create Palette";
+            _currentPaletteName = "";
+            ResetState();
         }
 
         private void ResetState()
         {
             PaletteColors.Clear();
             MixComponents.Clear();
-            Variants.Clear();
-            MixedColor = Colors.Gray;
-            BlendMode = "RGB";
-            SelectedPaletteColor = null;
-            SelectedVariant = null;
         }
 
         private async Task LoadPaletteAsync(int paletteId)
@@ -182,21 +189,32 @@ namespace ColorMix.ViewModel
 
                 if (savedPalette != null)
                 {
-                    foreach (var color in savedPalette.Colors)
+                    // Update page title with palette name
+                    _currentPaletteName = savedPalette.Name;
+                    PageTitle = $"Edit: {savedPalette.Name}";
+
+                    // Load colors
+                    if (savedPalette.Colors != null)
                     {
-                        // We need to find the original ColorEntity to get RGB values if possible, 
-                        // or recreate it from Hex. SavedPaletteColorEntity has HexValue.
-                        // Ideally we should link to ColorEntity, but for now we use the saved data.
-                        // We need Red, Green, Blue for mixing.
-                        var colorObj = Color.FromArgb(color.HexValue);
-                        PaletteColors.Add(new ColorEntity
+                        foreach (var color in savedPalette.Colors)
                         {
-                            ColorName = color.ColorName,
-                            HexValue = color.HexValue,
-                            Red = (int)(colorObj.Red * 255),
-                            Green = (int)(colorObj.Green * 255),
-                            Blue = (int)(colorObj.Blue * 255)
-                        });
+                            try
+                            {
+                                var colorObj = Color.FromArgb(color.HexValue);
+                                PaletteColors.Add(new ColorEntity
+                                {
+                                    ColorName = color.ColorName ?? "Unnamed",
+                                    HexValue = color.HexValue ?? "#808080",
+                                    Red = (int)(colorObj.Red * 255),
+                                    Green = (int)(colorObj.Green * 255),
+                                    Blue = (int)(colorObj.Blue * 255)
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error loading color {color.ColorName}: {ex.Message}");
+                            }
+                        }
                     }
 
                     // Load Variants for this palette
@@ -205,24 +223,39 @@ namespace ColorMix.ViewModel
                         .Include(v => v.Components)
                         .ToListAsync();
 
-                    foreach (var v in variants)
+                    if (variants != null)
                     {
-                        var p = new Palette(v.Name, v.HexColor, Color.FromArgb(v.HexColor)) { Id = v.Id };
-                        foreach (var c in v.Components)
+                        foreach (var v in variants)
                         {
-                            p.PaletteColors.Add(new MixColor(c.ColorName, Color.FromArgb(c.HexColor), c.Percentage, c.Ratio));
+                            try
+                            {
+                                var p = new Palette(v.Name ?? "Variant", v.HexColor ?? "#808080", Color.FromArgb(v.HexColor ?? "#808080")) { Id = v.Id };
+                                if (v.Components != null)
+                                {
+                                    foreach (var c in v.Components)
+                                    {
+                                        p.PaletteColors.Add(new MixColor(
+                                            c.ColorName ?? "Color",
+                                            Color.FromArgb(c.HexColor ?? "#808080"),
+                                            c.Percentage,
+                                            c.Ratio
+                                        ));
+                                    }
+                                }
+                                Variants.Add(p);
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error loading variant {v.Name}: {ex.Message}");
+                            }
                         }
-                        Variants.Add(p);
                     }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading palette: {ex.Message}");
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await Application.Current.MainPage.DisplayAlert("Error", "Failed to load palette data", "OK");
-                });
+                await Toast.Make($"Error loading palette: {ex.Message}").Show();
             }
         }
 
@@ -342,6 +375,38 @@ namespace ColorMix.ViewModel
                 ));
             }
             RecalculateMix();
+        }
+
+        private void OnLoadVariant(Palette variant)
+        {
+            if (variant == null) return;
+
+            try
+            {
+                // Clear existing mix components
+                MixComponents.Clear();
+
+                // Load variant's components into mix
+                foreach (var color in variant.PaletteColors)
+                {
+                    MixComponents.Add(new MixColor(
+                        color.ColorName,
+                        color.Color,
+                        color.Percentage,
+                        color.Ratio
+                    ));
+                }
+
+                // Set the mixed color
+                MixedColor = variant.PaletteColor;
+
+                Toast.Make($"Loaded variant: {variant.PaletteName}").Show();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading variant: {ex.Message}");
+                Toast.Make("Error loading variant").Show();
+            }
         }
 
         private void OnIncrement(MixColor item)

@@ -3,15 +3,165 @@
     x:Class="ColorMix.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:helpers="clr-namespace:ColorMix.Helpers"
     xmlns:local="clr-namespace:ColorMix">
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <!--
-            <local:ColorToRGBConverter x:Key="ColorToRGBConverter"/>
-            -->
+            <helpers:InvertedBoolConverter x:Key="InvertedBoolConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
+
+    <!--  Shell.TitleView with Search, Sort, Selection  -->
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*, Auto">
+            <!--  Normal Mode: Page Title  -->
+            <Label
+                Grid.Column="0"
+                FontAttributes="Bold"
+                FontSize="20"
+                IsVisible="{Binding IsSearching, Converter={StaticResource InvertedBoolConverter}}"
+                Text="Palettes"
+                TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                            Dark={StaticResource White}}"
+                VerticalOptions="Center" />
+
+            <!--  Search Mode: Search Entry  -->
+            <Border
+                Grid.Column="0"
+                IsVisible="{Binding IsSearching}"
+                Stroke="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                         Dark={StaticResource White}}"
+                StrokeShape="RoundRectangle 10"
+                StrokeThickness="2"
+                VerticalOptions="Center">
+                <Entry
+                    Margin="10,5"
+                    Placeholder="Search palettes..."
+                    Text="{Binding SearchText}"
+                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                Dark={StaticResource White}}" />
+            </Border>
+
+            <!--  Action Buttons  -->
+            <HorizontalStackLayout
+                Grid.Column="1"
+                Margin="15,0"
+                Spacing="15"
+                VerticalOptions="Center">
+
+                <!--  Selection Mode Buttons  -->
+                <HorizontalStackLayout IsVisible="{Binding IsSelectionMode}" Spacing="10">
+                    <!--  Select All  -->
+                    <ImageButton
+                        Command="{Binding SelectAllCommand}"
+                        HeightRequest="20"
+                        WidthRequest="25">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="fontello"
+                                Glyph="&#xf14a;"
+                                Size="30"
+                                Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                        Dark={StaticResource White}}" />
+                        </ImageButton.Source>
+                    </ImageButton>
+
+                    <!--  Batch Delete  -->
+                    <ImageButton
+                        Command="{Binding BatchDeleteCommand}"
+                        HeightRequest="20"
+                        WidthRequest="25">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="fontello"
+                                Glyph="&#xe80d;"
+                                Size="30"
+                                Color="{StaticResource MrbRed}" />
+                        </ImageButton.Source>
+                    </ImageButton>
+
+                    <!--  Batch Duplicate  -->
+                    <ImageButton
+                        Command="{Binding BatchDuplicateCommand}"
+                        HeightRequest="20"
+                        WidthRequest="25">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="fontello"
+                                Glyph="&#xf0c5;"
+                                Size="30"
+                                Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                        Dark={StaticResource White}}" />
+                        </ImageButton.Source>
+                    </ImageButton>
+
+                    <!--  Batch Share  -->
+                    <ImageButton
+                        Command="{Binding BatchShareCommand}"
+                        HeightRequest="20"
+                        WidthRequest="25">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="fontello"
+                                Glyph="&#xf1e0;"
+                                Size="30"
+                                Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                        Dark={StaticResource White}}" />
+                        </ImageButton.Source>
+                    </ImageButton>
+                </HorizontalStackLayout>
+
+                <!--  Normal Mode Buttons  -->
+                <HorizontalStackLayout IsVisible="{Binding IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}" Spacing="15">
+                    <!--  Search Toggle  -->
+                    <ImageButton
+                        Command="{Binding ToggleSearchCommand}"
+                        HeightRequest="20"
+                        WidthRequest="25">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="fontello"
+                                Glyph="&#xe800;"
+                                Size="30"
+                                Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                        Dark={StaticResource White}}" />
+                        </ImageButton.Source>
+                    </ImageButton>
+
+                    <!--  Sort  -->
+                    <ImageButton
+                        Command="{Binding OpenSortCommand}"
+                        HeightRequest="20"
+                        WidthRequest="25">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="fontello"
+                                Glyph="&#xf161;"
+                                Size="30"
+                                Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                        Dark={StaticResource White}}" />
+                        </ImageButton.Source>
+                    </ImageButton>
+                </HorizontalStackLayout>
+
+                <!--  Selection Mode Toggle (Always Visible)  -->
+                <ImageButton
+                    Command="{Binding ToggleSelectionModeCommand}"
+                    HeightRequest="20"
+                    WidthRequest="25">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="fontello"
+                            Glyph="&#xe802;"
+                            Size="30"
+                            Color="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                    Dark={StaticResource White}}" />
+                    </ImageButton.Source>
+                </ImageButton>
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.TitleView>
 
     <ScrollView>
         <VerticalStackLayout>
@@ -25,11 +175,28 @@
                         <Frame Margin="10,5" HeightRequest="180">
                             <Grid
                                 Padding="0"
-                                ColumnDefinitions="*, auto" ColumnSpacing="10"
+                                ColumnDefinitions="Auto, *, auto"
+                                ColumnSpacing="5"
                                 RowDefinitions="Auto, *, Auto"
                                 RowSpacing="2">
+
+                                <!--  Selection Checkbox  -->
+                                <CheckBox
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    HeightRequest="25"
+                                    IsChecked="{Binding IsSelected}"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.IsSelectionMode}"
+                                    VerticalOptions="Center"
+                                    WidthRequest="25">
+                                    <CheckBox.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.ToggleSelectionCommand}" CommandParameter="{Binding .}" />
+                                    </CheckBox.GestureRecognizers>
+                                </CheckBox>
                                 <!--  Palette Name  -->
                                 <Label
+                                    Grid.Row="0"
+                                    Grid.Column="1"
                                     FontAttributes="Bold"
                                     FontSize="18"
                                     HorizontalOptions="Start"
@@ -40,9 +207,10 @@
                                 <!--  Action Buttons  -->
                                 <HorizontalStackLayout
                                     Grid.Row="0"
-                                    Grid.Column="1"
+                                    Grid.Column="2"
                                     Margin="0,0,5,0"
                                     HorizontalOptions="End"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}"
                                     Spacing="15"
                                     VerticalOptions="Center">
                                     <Label
@@ -78,7 +246,7 @@
                                 <Grid
                                     Grid.Row="1"
                                     Grid.Column="0"
-                                    Grid.ColumnSpan="2"
+                                    Grid.ColumnSpan="3"
                                     Margin="0,10"
                                     ColumnDefinitions="auto,*"
                                     ColumnSpacing="5"
@@ -103,8 +271,9 @@
 
                                     <!--  Variants List (Top List)  -->
                                     <CollectionView
-                                        Grid.Row="0" Margin="0,5,0,0"
+                                        Grid.Row="0"
                                         Grid.Column="1"
+                                        Margin="0,5,0,0"
                                         HeightRequest="60"
                                         HorizontalOptions="Start"
                                         ItemsSource="{Binding Variants}"
@@ -171,6 +340,7 @@
                                 <Label
                                     Grid.Row="2"
                                     Grid.Column="0"
+                                    Grid.ColumnSpan="2"
                                     FontSize="12"
                                     HorizontalOptions="Start"
                                     LineBreakMode="TailTruncation"
@@ -183,14 +353,16 @@
                                 <!--  Delete Button  -->
                                 <Label
                                     Grid.Row="2"
-                                    Grid.Column="1"
+                                    Grid.Column="2"
                                     FontFamily="IconFont"
                                     FontSize="20"
                                     HorizontalOptions="End"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}"
                                     Text="&#xE80d;"
                                     TextColor="{StaticResource MrbRed}"
                                     VerticalOptions="Center">
                                     <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" />
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>

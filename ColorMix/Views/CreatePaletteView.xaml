@@ -96,7 +96,7 @@
                 Grid.Column="0"
                 FontAttributes="Bold"
                 FontSize="20"
-                Text="Create Palette"
+                Text="{Binding PageTitle}"
                 TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
                                             Dark={StaticResource White}}"
                 VerticalOptions="Center" />
@@ -389,7 +389,14 @@
                                     CornerRadius="5"
                                     HeightRequest="40"
                                     WidthRequest="40"
-                                    Color="{Binding PaletteColor}" />
+                                    Color="{Binding PaletteColor}">
+                                    <BoxView.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatePaletteViewModel}}, Path=LoadVariantCommand}"
+                                            CommandParameter="{Binding .}"
+                                            NumberOfTapsRequired="2" />
+                                    </BoxView.GestureRecognizers>
+                                </BoxView>
                                 <Label
                                     FontAttributes="Bold"
                                     FontSize="10"

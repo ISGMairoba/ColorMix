@@ -27,7 +27,10 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
 
-                        <Grid ColumnDefinitions="60, *" ColumnSpacing="15" Margin="5">
+                        <Grid
+                            Margin="5"
+                            ColumnDefinitions="60, *"
+                            ColumnSpacing="15">
                             <!--  Color Preview  -->
                             <BoxView
                                 Grid.Column="0"
