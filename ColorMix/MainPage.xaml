@@ -15,222 +15,184 @@
 
     <ScrollView>
         <VerticalStackLayout>
-            <CollectionView HorizontalOptions="Center" ItemsSource="{Binding Palettes}">
+            <CollectionView
+                HorizontalOptions="Center"
+                ItemsSource="{Binding Palettes}"
+                SelectionChanged="OnPaletteSelected"
+                SelectionMode="Single">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Margin="10,5" HeightRequest="185">
-
+                        <Frame Margin="10,5" HeightRequest="180">
                             <Grid
                                 Padding="0"
-                                ColumnDefinitions="*"
-                                RowDefinitions="30, *, auto">
+                                ColumnDefinitions="*, auto" ColumnSpacing="10"
+                                RowDefinitions="Auto, *, Auto"
+                                RowSpacing="2">
+                                <!--  Palette Name  -->
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="18"
+                                    HorizontalOptions="Start"
+                                    LineBreakMode="TailTruncation"
+                                    Text="{Binding PaletteName}"
+                                    VerticalOptions="Center" />
 
-                                <!--  Title and icons  -->
-                                <Grid
+                                <!--  Action Buttons  -->
+                                <HorizontalStackLayout
                                     Grid.Row="0"
-                                    Grid.Column="0"
-                                    ColumnDefinitions="*, 35,35,35"
-                                    RowDefinitions="*">
+                                    Grid.Column="1"
+                                    Margin="0,0,5,0"
+                                    HorizontalOptions="End"
+                                    Spacing="15"
+                                    VerticalOptions="Center">
+                                    <Label
+                                        FontFamily="fontello"
+                                        FontSize="20"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="&#xf0c5;">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.DuplicateCommand}" CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label
+                                        FontFamily="fontello"
+                                        FontSize="20"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="&#xe80c;">
+                                        <!--  Edit Icon  -->
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.EditCommand}" CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label
+                                        FontFamily="fontello"
+                                        FontSize="20"
+                                        Style="{StaticResource SecondaryLabel}"
+                                        Text="&#xf1e0;">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.ShareCommand}" CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </HorizontalStackLayout>
 
-                                    <Label
-                                        FontAttributes="Bold"
-                                        FontSize="18"
-                                        HorizontalOptions="Start"
-                                        Style="{StaticResource PrimaryLabel}"
-                                        Text="{Binding PaletteName}"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Column="1"
-                                        FontFamily="IconFont"
-                                        FontSize="20"
-                                        HorizontalOptions="Center"
-                                        Style="{StaticResource SecondaryLabel}"
-                                        Text="&#xE80c;"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Column="2"
-                                        FontFamily="IconFont"
-                                        FontSize="20"
-                                        HorizontalOptions="Center"
-                                        Style="{StaticResource SecondaryLabel}"
-                                        Text="&#xf0c5;"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Column="3"
-                                        FontFamily="IconFont"
-                                        FontSize="20"
-                                        HorizontalOptions="Center"
-                                        Style="{StaticResource SecondaryLabel}"
-                                        Text="&#xf1e0;"
-                                        VerticalOptions="Center" />
-                                </Grid>
-
-                                <!--  Peview and Colors List  -->
                                 <Grid
                                     Grid.Row="1"
-                                    Margin="0"
-                                    Padding="0"
-                                    ColumnDefinitions="120, *"
-                                    RowDefinitions="*,auto">
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,10"
+                                    ColumnDefinitions="auto,*"
+                                    ColumnSpacing="5"
+                                    HorizontalOptions="Fill"
+                                    RowDefinitions="*,*"
+                                    RowSpacing="5"
+                                    VerticalOptions="Fill">
+                                    <!--  Big Square (Mixed Color)  -->
                                     <RoundRectangle
                                         Grid.Row="0"
                                         Grid.RowSpan="2"
                                         Grid.Column="0"
-                                        Margin="0,5,10,0"
-                                        Background="{Binding PaletteColor}"
-                                        CornerRadius="10"
+                                        CornerRadius="15"
+                                        Fill="{Binding PaletteColor}"
                                         HeightRequest="115"
                                         HorizontalOptions="Start"
                                         Stroke="{AppThemeBinding Dark=White,
                                                                  Light=Black}"
                                         StrokeThickness="5"
-                                        VerticalOptions="Center"
+                                        VerticalOptions="Start"
                                         WidthRequest="115" />
 
-                                    <!--  Palette Varints  -->
+                                    <!--  Variants List (Top List)  -->
                                     <CollectionView
-                                        Grid.Row="0"
+                                        Grid.Row="0" Margin="0,5,0,0"
                                         Grid.Column="1"
-                                        Margin="5"
+                                        HeightRequest="60"
                                         HorizontalOptions="Start"
-                                        ItemsSource="{Binding PaletteColors}"
-                                        VerticalOptions="Center">
+                                        ItemsSource="{Binding Variants}"
+                                        VerticalOptions="Start">
                                         <CollectionView.ItemsLayout>
-
-                                            <!--  Orientation=Horizontal means horizontal scrolling; Span=2 means 2 rows  -->
-
                                             <LinearItemsLayout ItemSpacing="5" Orientation="Horizontal" />
                                         </CollectionView.ItemsLayout>
                                         <CollectionView.ItemTemplate>
                                             <DataTemplate>
-                                                <Frame
-                                                    Margin="0"
-                                                    Padding="0"
-                                                    BackgroundColor="Transparent"
-                                                    BorderColor="Transparent"
-                                                    CornerRadius="0"
-                                                    HeightRequest="50"
-                                                    HorizontalOptions="Center"
-                                                    MaximumWidthRequest="65"
-                                                    VerticalOptions="Center">
-                                                    <Grid RowDefinitions="32, *" VerticalOptions="Center">
-                                                        <RoundRectangle
-                                                            BackgroundColor="{Binding Color}"
-                                                            CornerRadius="5"
-                                                            HeightRequest="30"
-                                                            HorizontalOptions="Center"
-                                                            Stroke="{AppThemeBinding Dark=White,
-                                                                                     Light=Black}"
-                                                            StrokeThickness="3"
-                                                            VerticalOptions="Center"
-                                                            WidthRequest="60" />
-
-                                                        <Label
-                                                            Grid.Row="1"
-                                                            Margin="0"
-                                                            FontAttributes="Bold"
-                                                            FontSize="9"
-                                                            HorizontalOptions="Center"
-                                                            LineBreakMode="MiddleTruncation"
-                                                            Style="{StaticResource SecondaryLabel}"
-                                                            Text="{Binding ColorName}"
-                                                            VerticalOptions="Center" />
-
-                                                    </Grid>
-                                                </Frame>
+                                                <VerticalStackLayout Spacing="2">
+                                                    <BoxView
+                                                        BackgroundColor="Transparent"
+                                                        CornerRadius="5"
+                                                        HeightRequest="40"
+                                                        WidthRequest="60"
+                                                        Color="{Binding PaletteColor}" />
+                                                    <Label
+                                                        FontSize="10"
+                                                        HorizontalOptions="Center"
+                                                        LineBreakMode="TailTruncation"
+                                                        MaximumWidthRequest="40"
+                                                        Style="{StaticResource SecondaryLabel}"
+                                                        Text="{Binding PaletteName}" />
+                                                </VerticalStackLayout>
                                             </DataTemplate>
                                         </CollectionView.ItemTemplate>
                                     </CollectionView>
 
-                                    <!--  Palatte Colors  -->
+                                    <!--  Palette Colors List (Bottom List)  -->
                                     <CollectionView
-                                        Grid.Row="1"
+                                        Grid.Row="2"
                                         Grid.Column="1"
-                                        Margin="5"
+                                        Margin="0,5,0,0"
+                                        HeightRequest="60"
                                         HorizontalOptions="Start"
                                         ItemsSource="{Binding PaletteColors}"
-                                        VerticalOptions="Center">
+                                        VerticalOptions="Start">
                                         <CollectionView.ItemsLayout>
-
-                                            <!--  Orientation=Horizontal means horizontal scrolling; Span=2 means 2 rows  -->
-
                                             <LinearItemsLayout ItemSpacing="5" Orientation="Horizontal" />
                                         </CollectionView.ItemsLayout>
                                         <CollectionView.ItemTemplate>
                                             <DataTemplate>
-                                                <Frame
-                                                    Margin="0"
-                                                    Padding="0"
-                                                    BackgroundColor="Transparent"
-                                                    BorderColor="Transparent"
-                                                    CornerRadius="0"
-                                                    HeightRequest="60"
-                                                    HorizontalOptions="Center"
-                                                    MaximumWidthRequest="50"
-                                                    VerticalOptions="Center">
-                                                    <Grid RowDefinitions="*,auto, auto">
-                                                        <RoundRectangle
-                                                            BackgroundColor="{Binding Color}"
-                                                            CornerRadius="5"
-                                                            HeightRequest="30"
-                                                            HorizontalOptions="Center"
-                                                            Stroke="{AppThemeBinding Dark=White,
-                                                                                     Light=Black}"
-                                                            StrokeThickness="3"
-                                                            VerticalOptions="Center"
-                                                            WidthRequest="30" />
-                                                        <Label
-                                                            Grid.Row="1"
-                                                            Margin="0"
-                                                            FontAttributes="Bold"
-                                                            FontSize="9"
-                                                            HorizontalOptions="Center"
-                                                            LineBreakMode="MiddleTruncation"
-                                                            Style="{StaticResource SecondaryLabel}"
-                                                            Text="{Binding ColorName}"
-                                                            VerticalOptions="Center" />
-                                                        <Label
-                                                            Grid.Row="2"
-                                                            Margin="0"
-                                                            FontAttributes="Bold"
-                                                            FontSize="9"
-                                                            HorizontalOptions="Center"
-                                                            Style="{StaticResource SecondaryLabel}"
-                                                            Text="{Binding DisplayText}"
-                                                            VerticalOptions="Center" />
-                                                    </Grid>
-                                                </Frame>
+                                                <VerticalStackLayout Spacing="2">
+                                                    <BoxView
+                                                        BackgroundColor="Transparent"
+                                                        CornerRadius="5"
+                                                        HeightRequest="40"
+                                                        WidthRequest="40"
+                                                        Color="{Binding Color}" />
+                                                    <Label
+                                                        FontSize="10"
+                                                        HorizontalOptions="Center"
+                                                        LineBreakMode="TailTruncation"
+                                                        MaximumWidthRequest="50"
+                                                        Style="{StaticResource SecondaryLabel}"
+                                                        Text="{Binding ColorName}" />
+                                                </VerticalStackLayout>
                                             </DataTemplate>
                                         </CollectionView.ItemTemplate>
                                     </CollectionView>
                                 </Grid>
 
-                                <!--  Footers (Color Codes & delete Button)  -->
-                                <Grid
+                                <!--  Info  -->
+                                <Label
                                     Grid.Row="2"
                                     Grid.Column="0"
-                                    Grid.ColumnSpan="2"
-                                    Padding="0"
-                                    ColumnDefinitions="*, 25"
-                                    RowDefinitions="*">
+                                    FontSize="12"
+                                    HorizontalOptions="Start"
+                                    LineBreakMode="TailTruncation"
+                                    Text="{Binding DisplayText}"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                Dark={StaticResource Gray400}}"
+                                    VerticalOptions="Center" />
 
-                                    <Label
-                                        Grid.Column="1"
-                                        FontFamily="IconFont"
-                                        FontSize="20"
-                                        HorizontalOptions="Center"
-                                        Text="&#xE80d;"
-                                        TextColor="{StaticResource MrbRed}"
-                                        VerticalOptions="Center" />
-                                    <Label
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        FontSize="12"
-                                        HorizontalOptions="Start"
-                                        Style="{StaticResource SecondaryLabel}"
-                                        Text="{Binding DisplayText}"
-                                        VerticalOptions="Center" />
-                                </Grid>
+
+                                <!--  Delete Button  -->
+                                <Label
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    FontFamily="IconFont"
+                                    FontSize="20"
+                                    HorizontalOptions="End"
+                                    Text="&#xE80d;"
+                                    TextColor="{StaticResource MrbRed}"
+                                    VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                    </Label.GestureRecognizers>
+                                </Label>
                             </Grid>
                         </Frame>
                     </DataTemplate>

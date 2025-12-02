@@ -1,77 +1,90 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ColorMix.Views.ColorSelectionPopup"
-             Title="Select Color"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
-    
-    <Grid RowDefinitions="Auto, *, Auto" Padding="20">
-        <!-- Header -->
-        <Label Grid.Row="0"
-               Text="Select a color to add to palette"
-               FontSize="18"
-               FontAttributes="Bold"
-               Margin="0,0,0,20"
-               TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet}, Dark={StaticResource White}}"/>
-        
-        <!-- Color List -->
+<ContentPage
+    x:Class="ColorMix.Views.ColorSelectionPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Select Color"
+    BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                      Dark={StaticResource Black}}">
+
+    <Grid Padding="20" RowDefinitions="Auto, *, Auto">
+        <!--  Header  -->
+        <Label
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            FontAttributes="Bold"
+            FontSize="18"
+            Text="Select a color to add to palette"
+            TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                        Dark={StaticResource White}}" />
+
+        <!--  Color List  -->
         <ScrollView Grid.Row="1">
-            <CollectionView x:Name="ColorsCollection"
-                            SelectionMode="Single"
-                            SelectionChanged="OnColorSelected">
+            <CollectionView
+                x:Name="ColorsCollection"
+                SelectionChanged="OnColorSelected"
+                SelectionMode="Single">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Padding="10"
-                               Margin="0,5"
-                               BorderColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                            <Grid ColumnDefinitions="60, *" ColumnSpacing="15">
-                                <!-- Color Preview -->
-                                <BoxView Grid.Column="0"
-                                         HeightRequest="50"
-                                         WidthRequest="50"
-                                         CornerRadius="5"
-                                         Color="{Binding HexValue}"/>
-                                
-                                <!-- Color Info -->
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
-                                    <Label Text="{Binding ColorName}"
-                                           FontSize="16"
-                                           FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet}, Dark={StaticResource White}}"/>
-                                    <Label Text="{Binding HexValue}"
-                                           FontSize="14"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
-                                    <Label FontSize="12"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="RGB(" />
-                                                <Span Text="{Binding Red}" />
-                                                <Span Text=", " />
-                                                <Span Text="{Binding Green}" />
-                                                <Span Text=", " />
-                                                <Span Text="{Binding Blue}" />
-                                                <Span Text=")" />
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                </VerticalStackLayout>
-                            </Grid>
-                        </Frame>
+
+                        <Grid ColumnDefinitions="60, *" ColumnSpacing="15" Margin="5">
+                            <!--  Color Preview  -->
+                            <BoxView
+                                Grid.Column="0"
+                                BackgroundColor="Transparent"
+                                CornerRadius="5"
+                                HeightRequest="50"
+                                WidthRequest="50"
+                                Color="{Binding HexValue}" />
+
+                            <!--  Color Info  -->
+                            <VerticalStackLayout
+                                Grid.Column="1"
+                                Spacing="5"
+                                VerticalOptions="Center">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="16"
+                                    Text="{Binding ColorName}"
+                                    TextColor="{AppThemeBinding Light={StaticResource MrbSpaceCadet},
+                                                                Dark={StaticResource White}}" />
+                                <Label
+                                    FontSize="14"
+                                    Text="{Binding HexValue}"
+                                    TextColor="{AppThemeBinding Light={StaticResource Gray600},
+                                                                Dark={StaticResource Gray400}}" />
+                                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="RGB(" />
+                                            <Span Text="{Binding Red}" />
+                                            <Span Text=", " />
+                                            <Span Text="{Binding Green}" />
+                                            <Span Text=", " />
+                                            <Span Text="{Binding Blue}" />
+                                            <Span Text=")" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </VerticalStackLayout>
+                        </Grid>
+
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </ScrollView>
-        
-        <!-- Cancel Button -->
-        <Button Grid.Row="2"
-                Text="Cancel"
-                Margin="0,20,0,0"
-                BackgroundColor="Transparent"
-                TextColor="{StaticResource MrbUNBlue}"
-                BorderColor="{StaticResource MrbUNBlue}"
-                BorderWidth="1"
-                Clicked="OnCancelClicked"/>
+
+        <!--  Cancel Button  -->
+        <Button
+            Grid.Row="2"
+            Margin="0,20,0,0"
+            BackgroundColor="Transparent"
+            BorderColor="{StaticResource MrbUNBlue}"
+            BorderWidth="2"
+            Clicked="OnCancelClicked"
+            FontAttributes="Bold"
+            FontSize="18"
+            Text="Cancel"
+            TextColor="{StaticResource MrbUNBlue}" />
     </Grid>
 </ContentPage>

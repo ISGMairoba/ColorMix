@@ -11,7 +11,7 @@ using Microsoft.Maui.Graphics;
 
 namespace ColorMix.ViewModel
 {
-    public class CreatePaletteViewModel : INotifyPropertyChanged
+    public class CreatePaletteViewModel : INotifyPropertyChanged, IQueryAttributable
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -27,6 +27,7 @@ namespace ColorMix.ViewModel
                 {
                     SelectedPaletteColor = null;
                 }
+                OnPropertyChanged(nameof(IsDeleteVisible));
             }
         }
 
@@ -42,14 +43,18 @@ namespace ColorMix.ViewModel
                 {
                     SelectedVariant = null;
                 }
+                OnPropertyChanged(nameof(IsDeleteVisible));
             }
         }
+
+        public bool IsDeleteVisible => SelectedPaletteColor != null || SelectedVariant != null;
 
         private ObservableCollection<ColorEntity> _paletteColors = new();
         private ObservableCollection<MixColor> _mixComponents = new();
         private ObservableCollection<Palette> _variants = new();
         private Color _mixedColor = Colors.Gray;
         private string _blendMode = "RGB";
+        private int? _currentPaletteId;
 
         public ObservableCollection<ColorEntity> PaletteColors
         {
@@ -130,8 +135,6 @@ namespace ColorMix.ViewModel
             try
             {
                 await _dbContext.InitializeDatabaseAsync();
-                await LoadColorsAsync();
-                await LoadVariantsAsync();
             }
             catch (Exception ex)
             {
@@ -139,28 +142,87 @@ namespace ColorMix.ViewModel
             }
         }
 
-        private async Task LoadColorsAsync()
+        public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            PaletteColors.Clear();
-            var colors = await _dbContext.Colors.ToListAsync();
-            foreach (var color in colors)
+            if (query.ContainsKey("PaletteId"))
             {
-                PaletteColors.Add(color);
+                if (int.TryParse(query["PaletteId"].ToString(), out int paletteId))
+                {
+                    _currentPaletteId = paletteId;
+                    await LoadPaletteAsync(paletteId);
+                }
+            }
+            else
+            {
+                _currentPaletteId = null;
+                ResetState();
             }
         }
 
-        private async Task LoadVariantsAsync()
+        private void ResetState()
         {
+            PaletteColors.Clear();
+            MixComponents.Clear();
             Variants.Clear();
-            var variants = await _dbContext.PaletteVariants.Include(v => v.Components).ToListAsync();
-            foreach (var v in variants)
+            MixedColor = Colors.Gray;
+            BlendMode = "RGB";
+            SelectedPaletteColor = null;
+            SelectedVariant = null;
+        }
+
+        private async Task LoadPaletteAsync(int paletteId)
+        {
+            try
             {
-                var p = new Palette(v.Name, v.HexColor, Color.FromArgb(v.HexColor)) { Id = v.Id };
-                foreach (var c in v.Components)
+                ResetState();
+
+                var savedPalette = await _dbContext.SavedPalettes
+                    .Include(p => p.Colors)
+                    .FirstOrDefaultAsync(p => p.Id == paletteId);
+
+                if (savedPalette != null)
                 {
-                    p.PaletteColors.Add(new MixColor(c.ColorName, Color.FromArgb(c.HexColor), c.Percentage, c.Ratio));
+                    foreach (var color in savedPalette.Colors)
+                    {
+                        // We need to find the original ColorEntity to get RGB values if possible, 
+                        // or recreate it from Hex. SavedPaletteColorEntity has HexValue.
+                        // Ideally we should link to ColorEntity, but for now we use the saved data.
+                        // We need Red, Green, Blue for mixing.
+                        var colorObj = Color.FromArgb(color.HexValue);
+                        PaletteColors.Add(new ColorEntity
+                        {
+                            ColorName = color.ColorName,
+                            HexValue = color.HexValue,
+                            Red = (int)(colorObj.Red * 255),
+                            Green = (int)(colorObj.Green * 255),
+                            Blue = (int)(colorObj.Blue * 255)
+                        });
+                    }
+
+                    // Load Variants for this palette
+                    var variants = await _dbContext.PaletteVariants
+                        .Where(v => v.SavedPaletteId == paletteId)
+                        .Include(v => v.Components)
+                        .ToListAsync();
+
+                    foreach (var v in variants)
+                    {
+                        var p = new Palette(v.Name, v.HexColor, Color.FromArgb(v.HexColor)) { Id = v.Id };
+                        foreach (var c in v.Components)
+                        {
+                            p.PaletteColors.Add(new MixColor(c.ColorName, Color.FromArgb(c.HexColor), c.Percentage, c.Ratio));
+                        }
+                        Variants.Add(p);
+                    }
                 }
-                Variants.Add(p);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading palette: {ex.Message}");
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", "Failed to load palette data", "OK");
+                });
             }
         }
 
@@ -258,6 +320,7 @@ namespace ColorMix.ViewModel
             {
                 await MainThread.InvokeOnMainThreadAsync(() => Toast.Make("Select a color or variant to delete").Show());
             }
+            OnPropertyChanged(nameof(IsDeleteVisible));
         }
 
         private void OnAddColorToMix(ColorEntity color)
@@ -416,9 +479,11 @@ namespace ColorMix.ViewModel
                 }
                 await _dbContext.SaveChangesAsync();
 
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
                     Toast.Make("Palette Saved Successfully").Show();
+                    // Navigate back to palettes page
+                    await Shell.Current.GoToAsync("//MainPage");
                 });
             }
             catch (Exception ex)

@@ -35,6 +35,7 @@ namespace ColorMix
         public string DisplayText => $"RGB({(int)(PaletteColor.Red * 255)}, {(int)(PaletteColor.Green * 255)}, {(int)(PaletteColor.Blue * 255)}) {PaletteColorHex}";
 
         public ObservableCollection<MixColor> PaletteColors { get; set; } = new();
+        public ObservableCollection<Palette> Variants { get; set; } = new();
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

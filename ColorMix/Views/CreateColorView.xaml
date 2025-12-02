@@ -3,21 +3,21 @@
     x:Class="ColorMix.Views.CreateColorView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:ColorMix.Controls"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:ColorMix.ViewModel"
-    xmlns:controls="clr-namespace:ColorMix.Controls"
     Title="CreateColorView">
 
     <Grid RowDefinitions="*, Auto">
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Spacing="20" Padding="0,0,0,20">
+            <VerticalStackLayout Padding="0,0,0,20" Spacing="20">
                 <Frame
+                    Margin="0,20,0,0"
                     Padding="0"
                     CornerRadius="50"
                     HeightRequest="250"
-                    WidthRequest="250"
                     HorizontalOptions="Center"
-                    Margin="0,20,0,0">
+                    WidthRequest="250">
                     <GraphicsView
                         x:Name="ColorPreview"
                         BackgroundColor="Transparent"
@@ -26,41 +26,57 @@
                         WidthRequest="250" />
                 </Frame>
 
-                <!-- Hex and RGB Inputs Side-by-Side -->
-                <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                <!--  Hex and RGB Inputs Side-by-Side  -->
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
                     <VerticalStackLayout Spacing="0">
-                        <Label Text="RGB" HorizontalOptions="Center" FontSize="12" TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}"/>
-                        <controls:LabelEntry 
-                            Text="{Binding RgbEntry}" 
-                            Placeholder="R, G, B" 
+                        <Label
+                            FontSize="12"
+                            HorizontalOptions="Center"
+                            Text="RGB"
+                            TextColor="{AppThemeBinding Light=Gray,
+                                                        Dark=LightGray}" />
+                        <controls:LabelEntry
                             FontSize="18"
-                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                            Placeholder="R, G, B"
+                            Text="{Binding RgbEntry}"
+                            TextColor="{AppThemeBinding Light=Black,
+                                                        Dark=White}"
                             WidthRequest="150" />
                     </VerticalStackLayout>
-                    
+
                     <VerticalStackLayout Spacing="0">
-                        <Label Text="HEX" HorizontalOptions="Center" FontSize="12" TextColor="{AppThemeBinding Light=Gray, Dark=LightGray}"/>
-                        <controls:LabelEntry 
-                            Text="{Binding HexEntry}" 
-                            Placeholder="#RRGGBB" 
+                        <Label
+                            FontSize="12"
+                            HorizontalOptions="Center"
+                            Text="HEX"
+                            TextColor="{AppThemeBinding Light=Gray,
+                                                        Dark=LightGray}" />
+                        <controls:LabelEntry
                             FontSize="18"
-                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                            Placeholder="#RRGGBB"
+                            Text="{Binding HexEntry}"
+                            TextColor="{AppThemeBinding Light=Black,
+                                                        Dark=White}"
                             WidthRequest="150" />
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
 
                 <VerticalStackLayout Spacing="10">
-                    
-                    <!-- Color Name Input -->
-                    <controls:LabelEntry 
-                        Placeholder="Color Name"
-                        Text="{Binding ColorName}"
+
+                    <!--  Color Name Input  -->
+                    <controls:LabelEntry
                         FontSize="24"
                         HorizontalOptions="Center"
-                        TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                        Placeholder="Color Name"
+                        Text="{Binding ColorName}"
+                        TextColor="{AppThemeBinding Light=Black,
+                                                    Dark=White}"
                         WidthRequest="300" />
 
-                    <HorizontalStackLayout Margin="10,0" Spacing="10" HorizontalOptions="Center">
+                    <HorizontalStackLayout
+                        Margin="10,0"
+                        HorizontalOptions="Center"
+                        Spacing="10">
                         <Button
                             Command="{Binding ChangeModeCommand}"
                             CommandParameter="RGB"
@@ -76,26 +92,35 @@
                             Text="C M Y K"
                             WidthRequest="90" />
                     </HorizontalStackLayout>
-                    
-                    <!-- RGB Sliders -->
+
+                    <!--  RGB Sliders  -->
                     <VerticalStackLayout IsVisible="{Binding IsRGBVisible}">
-                        <Label Text="{Binding RgbRed, StringFormat='Red: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding RgbRed, StringFormat='Red: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="255"
                             Minimum="0"
                             ThumbColor="Red"
                             Value="{Binding RgbRed}" />
-                            
-                        <Label Text="{Binding RgbGreen, StringFormat='Green: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding RgbGreen, StringFormat='Green: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="255"
                             Minimum="0"
                             ThumbColor="Green"
                             Value="{Binding RgbGreen}" />
-                            
-                        <Label Text="{Binding RgbBlue, StringFormat='Blue: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding RgbBlue, StringFormat='Blue: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="255"
@@ -104,33 +129,45 @@
                             Value="{Binding RgbBlue}" />
                     </VerticalStackLayout>
 
-                    <!-- CMYK Sliders -->
+                    <!--  CMYK Sliders  -->
                     <VerticalStackLayout IsVisible="{Binding IsCMYKVisible}">
-                        <Label Text="{Binding CmykCyan, StringFormat='Cyan: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding CmykCyan, StringFormat='Cyan: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="100"
                             Minimum="0"
                             ThumbColor="Cyan"
                             Value="{Binding CmykCyan}" />
-                            
-                        <Label Text="{Binding CmykMagenta, StringFormat='Magenta: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding CmykMagenta, StringFormat='Magenta: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="100"
                             Minimum="0"
                             ThumbColor="Magenta"
                             Value="{Binding CmykMagenta}" />
-                            
-                        <Label Text="{Binding CmykYellow, StringFormat='Yellow: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding CmykYellow, StringFormat='Yellow: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="100"
                             Minimum="0"
                             ThumbColor="Yellow"
                             Value="{Binding CmykYellow}" />
-                            
-                        <Label Text="{Binding CmykBlack, StringFormat='Black: {0}'}" Margin="20,0" FontAttributes="Bold"/>
+
+                        <Label
+                            Margin="20,0"
+                            FontAttributes="Bold"
+                            Text="{Binding CmykBlack, StringFormat='Black: {0}'}" />
                         <Slider
                             Margin="20,0,20,10"
                             Maximum="100"
@@ -142,20 +179,20 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Action Buttons -->
-        <HorizontalStackLayout 
-            Grid.Row="1" 
-            Spacing="20" 
-            HorizontalOptions="Center" 
-            Margin="0,20,0,20">
-            <Button 
-                Text="Reset" 
+        <!--  Action Buttons  -->
+        <HorizontalStackLayout
+            Grid.Row="1"
+            Margin="0,20,0,20"
+            HorizontalOptions="Center"
+            Spacing="20">
+            <Button
+                BackgroundColor="{StaticResource MrbRed}"
                 Command="{Binding ResetCommand}"
-                WidthRequest="120"
-                BackgroundColor="{StaticResource MrbRed}" />
-            <Button 
-                Text="Save" 
+                Text="Reset"
+                WidthRequest="120" />
+            <Button
                 Command="{Binding SaveCommand}"
+                Text="Save"
                 WidthRequest="120" />
         </HorizontalStackLayout>
     </Grid>

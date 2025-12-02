@@ -143,6 +143,7 @@
                 <ImageButton
                     Command="{Binding RemoveColorCommand}"
                     HeightRequest="25"
+                    IsVisible="{Binding IsDeleteVisible}"
                     VerticalOptions="Center"
                     WidthRequest="30">
                     <ImageButton.Source>
@@ -179,16 +180,17 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <VerticalStackLayout Spacing="2">
-                                <VerticalStackLayout.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatePaletteViewModel}}, Path=AddColorToMixCommand}"
-                                        CommandParameter="{Binding .}"
-                                        NumberOfTapsRequired="2" />
-                                </VerticalStackLayout.GestureRecognizers>
                                 <BoxView
                                     HeightRequest="40"
                                     WidthRequest="40"
-                                    Color="{Binding HexValue}" />
+                                    Color="{Binding HexValue}">
+                                    <BoxView.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreatePaletteViewModel}}, Path=AddColorToMixCommand}"
+                                            CommandParameter="{Binding .}"
+                                            NumberOfTapsRequired="2" />
+                                    </BoxView.GestureRecognizers>
+                                </BoxView>
                                 <Label
                                     FontAttributes="Bold"
                                     FontSize="10"
@@ -205,7 +207,7 @@
                                         <VisualState Name="Normal" />
                                         <VisualState Name="Selected">
                                             <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E0E0E0, Dark=#404040}" />
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                     </VisualStateGroup>
@@ -259,6 +261,8 @@
                     <BoxView
                         Grid.Column="0"
                         Margin="0,5"
+                        BackgroundColor="Transparent"
+                        CornerRadius="15"
                         HeightRequest="150"
                         VerticalOptions="Start"
                         WidthRequest="150"
@@ -381,6 +385,7 @@
                         <DataTemplate>
                             <VerticalStackLayout Spacing="2">
                                 <BoxView
+                                    BackgroundColor="Transparent"
                                     CornerRadius="5"
                                     HeightRequest="40"
                                     WidthRequest="40"

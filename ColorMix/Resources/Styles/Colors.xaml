@@ -32,7 +32,7 @@
     <Color x:Key="MrbAntiFlashwhite">#EFEFEF</Color>
     <Color x:Key="MrbMnBle">#45556d</Color>
     <Color x:Key="MrbRed">#FF0C0C</Color>
-    <Color x:Key="MrbPowderBlue">#B9C6DF</Color> 
+    <Color x:Key="MrbPowderBlue">#B9C6DF</Color>
 
 
 
