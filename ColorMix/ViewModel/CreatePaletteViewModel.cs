@@ -175,6 +175,11 @@ namespace ColorMix.ViewModel
         {
             PaletteColors.Clear();
             MixComponents.Clear();
+            Variants.Clear();
+            MixedColor = Colors.Gray;
+            BlendMode = "RGB";
+            SelectedPaletteColor = null;
+            SelectedVariant = null;
         }
 
         private async Task LoadPaletteAsync(int paletteId)

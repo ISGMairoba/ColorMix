@@ -1,11 +1,16 @@
-﻿namespace ColorMix
+﻿using ColorMix.Constants;
+
+namespace ColorMix
 {
     public partial class AppShell : Shell
     {
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute("EditColor", typeof(Views.CreateColorView));
+            
+            // Register routes for navigation
+            Routing.RegisterRoute(Routes.EditColor, typeof(Views.CreateColorView));
+            Routing.RegisterRoute(Routes.CreatePalette, typeof(Views.CreatePaletteView));
         }
     }
 }
