@@ -232,19 +232,11 @@ namespace ColorMix
 
         private async Task NavigateToEdit(Palette palette)
         {
-            try
+            var navigationParameter = new Dictionary<string, object>
             {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "PaletteId", palette.Id }
-                };
-                await Shell.Current.GoToAsync(Constants.Routes.CreatePalette, navigationParameter);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Navigation error: {ex.Message}");
-                await DisplayAlert("Navigation Error", $"Failed to open palette editor: {ex.Message}", "OK");
-            }
+                { "PaletteId", palette.Id }
+            };
+            await Shell.Current.GoToAsync("CreatePaletteView", navigationParameter);
         }
 
         private async void OnDuplicate(Palette palette)
