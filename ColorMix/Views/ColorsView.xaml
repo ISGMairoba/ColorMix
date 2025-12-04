@@ -111,45 +111,29 @@
             <!--  Selection Mode Toolbar  -->
             <Grid
                 Grid.Column="1"
-                ColumnDefinitions="*, Auto, Auto, Auto, Auto, Auto"
-                ColumnSpacing="10"
+                ColumnDefinitions="Auto, Auto, Auto, Auto"
+                ColumnSpacing="15"
                 IsVisible="{Binding IsSelectionMode}">
 
-                <Button
+                <!--  Smart Select All/None Toggle  -->
+                <ImageButton
                     Grid.Column="0"
-                    Padding="0"
-                    BackgroundColor="Transparent"
-                    Command="{Binding ToggleSelectionModeCommand}"
-                    FontAttributes="Bold"
-                    HorizontalOptions="End"
-                    Text="Cancel"
-                    TextColor="{AppThemeBinding Light=Black,
-                                                Dark=White}" />
-
-                <Button
-                    Grid.Column="1"
-                    Padding="0"
-                    BackgroundColor="Transparent"
                     Command="{Binding SelectAllCommand}"
-                    FontAttributes="Bold"
-                    Text="All"
-                    TextColor="{AppThemeBinding Light=Black,
-                                                Dark=White}"
-                    WidthRequest="20" />
-
-                <Button
-                    Grid.Column="2"
-                    Padding="0"
-                    BackgroundColor="Transparent"
-                    Command="{Binding DeselectAllCommand}"
-                    FontAttributes="Bold"
-                    Text="None"
-                    TextColor="{AppThemeBinding Light=Black,
-                                                Dark=White}"
-                    WidthRequest="30" />
+                    HeightRequest="20"
+                    VerticalOptions="Center"
+                    WidthRequest="25">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="fontello"
+                            Glyph="&#xf14a;"
+                            Size="30"
+                            Color="{AppThemeBinding Light=Black,
+                                                    Dark=White}" />
+                    </ImageButton.Source>
+                </ImageButton>
 
                 <ImageButton
-                    Grid.Column="3"
+                    Grid.Column="1"
                     Command="{Binding BatchShareCommand}"
                     HeightRequest="20"
                     VerticalOptions="Center"
@@ -165,7 +149,7 @@
                 </ImageButton>
 
                 <ImageButton
-                    Grid.Column="4"
+                    Grid.Column="2"
                     Command="{Binding BatchDuplicateCommand}"
                     HeightRequest="20"
                     VerticalOptions="Center"
@@ -181,7 +165,7 @@
                 </ImageButton>
 
                 <ImageButton
-                    Grid.Column="5"
+                    Grid.Column="3"
                     Command="{Binding BatchDeleteCommand}"
                     HeightRequest="20"
                     VerticalOptions="Center"
