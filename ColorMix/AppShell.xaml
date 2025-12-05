@@ -12,7 +12,7 @@
 
     <ShellContent
         Title="Palettes"
-        ContentTemplate="{DataTemplate local:MainPage}"
+        ContentTemplate="{DataTemplate local:PaletteView}"
         Icon="{AppThemeBinding Dark=palette_white.png,
                                Light=palette_black.png}"
         Route="MainPage" />

@@ -1,14 +1,4 @@
-﻿/// <summary>
-/// This file contains the ViewModel for the Create/Edit Color page.
-/// This ViewModel handles:
-/// - Creating and editing individual colors
-/// - RGB sliders (0-255 for each channel)
-/// - CMYK sliders (0-100 percentages for Cyan, Magenta, Yellow, Black)
-/// - Converting between RGB and CMYK color spaces
-/// - Hex and RGB text entry
-/// - Preventing circular updates when converting between color spaces
-/// </summary>
-using ColorMix.Helpers;
+﻿using ColorMix.Helpers;
 using ColorMix.Services;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;

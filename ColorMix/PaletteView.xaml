@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="ColorMix.MainPage"
+    x:Class="ColorMix.PaletteView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:helpers="clr-namespace:ColorMix.Helpers"
-    xmlns:local="clr-namespace:ColorMix">
+    xmlns:local="clr-namespace:ColorMix"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -168,8 +169,10 @@
             <CollectionView
                 HorizontalOptions="Center"
                 ItemsSource="{Binding Palettes}"
-                SelectionChanged="OnPaletteSelected"
                 SelectionMode="Single">
+                <CollectionView.Behaviors>
+                    <toolkit:EventToCommandBehavior Command="{Binding PaletteSelectedCommand}" EventName="SelectionChanged" />
+                </CollectionView.Behaviors>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame Margin="10,5" HeightRequest="180">
@@ -186,11 +189,11 @@
                                     Grid.Column="0"
                                     HeightRequest="25"
                                     IsChecked="{Binding IsSelected}"
-                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.IsSelectionMode}"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.IsSelectionMode}"
                                     VerticalOptions="Center"
                                     WidthRequest="25">
                                     <CheckBox.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.ToggleSelectionCommand}" CommandParameter="{Binding .}" />
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.ToggleSelectionCommand}" CommandParameter="{Binding .}" />
                                     </CheckBox.GestureRecognizers>
                                 </CheckBox>
                                 <!--  Palette Name  -->
@@ -210,7 +213,7 @@
                                     Grid.Column="2"
                                     Margin="0,0,5,0"
                                     HorizontalOptions="End"
-                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}"
                                     Spacing="15"
                                     VerticalOptions="Center">
                                     <Label
@@ -219,7 +222,7 @@
                                         Style="{StaticResource SecondaryLabel}"
                                         Text="&#xf0c5;">
                                         <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.DuplicateCommand}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.DuplicateCommand}" CommandParameter="{Binding .}" />
                                         </Label.GestureRecognizers>
                                     </Label>
                                     <Label
@@ -229,7 +232,7 @@
                                         Text="&#xe80c;">
                                         <!--  Edit Icon  -->
                                         <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.EditCommand}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.EditCommand}" CommandParameter="{Binding .}" />
                                         </Label.GestureRecognizers>
                                     </Label>
                                     <Label
@@ -238,7 +241,7 @@
                                         Style="{StaticResource SecondaryLabel}"
                                         Text="&#xf1e0;">
                                         <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.ShareCommand}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.ShareCommand}" CommandParameter="{Binding .}" />
                                         </Label.GestureRecognizers>
                                     </Label>
                                 </HorizontalStackLayout>
@@ -357,12 +360,12 @@
                                     FontFamily="IconFont"
                                     FontSize="20"
                                     HorizontalOptions="End"
-                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}"
+                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.IsSelectionMode, Converter={StaticResource InvertedBoolConverter}}"
                                     Text="&#xE80d;"
                                     TextColor="{StaticResource MrbRed}"
                                     VerticalOptions="Center">
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" />
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:PaletteView}}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" />
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>

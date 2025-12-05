@@ -1,8 +1,3 @@
-/// <summary>
-/// This file is the code-behind for CreateColorView.xaml.
-/// Handles creating and editing individual colors with RGB/CMYK mode switching.
-/// Uses QueryProperty attributes to receive navigation parameters when editing existing colors.
-/// </summary>
 using ColorMix.ViewModel;
 
 namespace ColorMix.Views;

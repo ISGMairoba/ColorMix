@@ -1,8 +1,3 @@
-/// <summary>
-/// This file is the code-behind for CreatePaletteView.xaml.
-/// Handles creating new palettes or editing existing ones.
-/// The ViewModel handles navigation parameters via IQueryAttributable.
-/// </summary>
 using ColorMix.ViewModel;
 
 namespace ColorMix.Views;

@@ -1,8 +1,4 @@
-﻿/// <summary>
-/// This file defines the navigation structure for the ColorMix app.
-/// In .NET MAUI, Shell provides a sophisticated navigation system with flyout menus, tabs, and URI-based routing.
-/// </summary>
-using ColorMix.Constants;
+﻿using ColorMix.Constants;
 
 namespace ColorMix
 {

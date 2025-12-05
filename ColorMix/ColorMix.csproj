@@ -85,6 +85,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="PaletteView.xaml.cs">
+	    <DependentUpon>PaletteView.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\CreatePaletteView.xaml.cs">
 	    <DependentUpon>CreatePaletteView.xaml</DependentUpon>
 	  </Compile>

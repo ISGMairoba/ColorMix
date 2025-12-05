@@ -1,17 +1,3 @@
-/// <summary>
-/// This file contains the ViewModel for the Create/Edit Palette page.
-/// 
-/// WHAT IS MVVM?
-/// MVVM (Model-View-ViewModel) is a design pattern that separates:
-/// - Model: Data and business logic (our Entity classes)
-/// - View: User interface (XAML files)
-/// - ViewModel: Connects View and Model, contains UI logic and data
-/// 
-/// WHY USE VIEWMODELS?
-/// - Separates UI from logic (easier to test and maintain)
-/// - Enables data binding (UI automatically updates when data changes)
-/// - Keeps Views simple (they just display data, logic is in ViewModel)
-/// </summary>
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
