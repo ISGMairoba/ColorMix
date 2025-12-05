@@ -1,4 +1,14 @@
-﻿using ColorMix.Helpers;
+﻿/// <summary>
+/// This file contains the ViewModel for the Create/Edit Color page.
+/// This ViewModel handles:
+/// - Creating and editing individual colors
+/// - RGB sliders (0-255 for each channel)
+/// - CMYK sliders (0-100 percentages for Cyan, Magenta, Yellow, Black)
+/// - Converting between RGB and CMYK color spaces
+/// - Hex and RGB text entry
+/// - Preventing circular updates when converting between color spaces
+/// </summary>
+using ColorMix.Helpers;
 using ColorMix.Services;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
@@ -8,26 +18,39 @@ using System.Windows.Input;
 
 namespace ColorMix.ViewModel
 {
+    /// <summary>
+    /// ViewModel for the Create/Edit Color page.
+    /// Handles RGB and CMYK color editing with real-time conversion between color spaces.
+    /// </summary>
     public class CreateColorViewModel : INotifyPropertyChanged
     {
         #region Fields
+        // RGB values (0-255)
         private int rgbBlue;
         private int rgbGreen;
         private int rgbRed;
+        
+        // CMYK values (0-100 percentages)
         private int cmykBlack;
         private int cmykMagenta;
         private int cmykYellow;
         private int cmykCyan;
-        private string _selectedMode = "RGB";
-        private readonly ColorDrawable _colorDrawable;
+        
+        private string _selectedMode = "RGB";  // Either "RGB" or "CMYK"
+        private readonly ColorDrawable _colorDrawable;  // Custom drawable for previewing color
         private readonly IColorService? _colorService;
 
-        // Conversion guards
-        private bool _isUpdatingFromRGB;
-        private bool _isUpdatingFromCMYK;
+        // Conversion guards to prevent circular updates
+        // When RGB changes, it updates CMYK. Without guards, CMYK would then update RGB, creating a loop!
+        private bool _isUpdatingFromRGB;  // True when converting RGB->CMYK
+        private bool _isUpdatingFromCMYK;  // True when converting CMYK->RGB
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Red channel value (0-255).
+        /// When changed, updates the color preview and CMYK sliders.
+        /// </summary>
         public int RgbRed
         {
             get => rgbRed;
@@ -35,7 +58,8 @@ namespace ColorMix.ViewModel
             {
                 if (rgbRed == value) return;
                 rgbRed = value;
-                UpdateColor();
+                UpdateColor();  // Update color preview
+                // Only update CMYK if we're in RGB mode and not already updating from CMYK
                 if (!_isUpdatingFromCMYK && SelectedMode == "RGB")
                     UpdateCmykSlider();
                 OnPropertyChanged();
@@ -146,6 +170,7 @@ namespace ColorMix.ViewModel
         public ICommand ChangeModeCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand OnBackButtonPressedCommand { get; } // This command will be triggered when the user clicks BACK
 
         private string _colorName = string.Empty;
         public string ColorName
@@ -170,6 +195,7 @@ namespace ColorMix.ViewModel
             ChangeModeCommand = new Command<string>(ChangeMode);
             SaveCommand = new Command(async () => await SaveColorAsync(), CanSave);
             ResetCommand = new Command(ResetColor);
+            OnBackButtonPressedCommand = new Command(async () => await HandleBackPress());
             _colorDrawable = new ColorDrawable();
             UpdateColor();
         }
@@ -238,6 +264,25 @@ namespace ColorMix.ViewModel
             }
         }
 
+        private async Task HandleBackPress()
+        {
+            // Show a popup asking the user what they want to do
+            bool discard = await Shell.Current.DisplayAlert(
+                "Unsaved Changes",         // Title of the popup
+                "Discard your current changes?", // Message
+                "Discard",                 // Button 1
+                "Cancel"                     // Button 2
+            );
+
+            // If the user chooses "Discard"
+            if (discard)
+            {
+                // Go back to the previous page
+                await Shell.Current.GoToAsync("..");
+            }
+
+        }
+
         private void ResetColor()
         {
             _isUpdatingFromCMYK = true;
@@ -281,31 +326,55 @@ namespace ColorMix.ViewModel
             UpdateRgbString();
         }
 
+        /// <summary>
+        /// Converts current CMYK values to RGB.
+        /// 
+        /// CMYK TO RGB CONVERSION FORMULA:
+        /// R = 255 × (1 - C) × (1 - K)
+        /// G = 255 × (1 - M) × (1 - K)
+        /// B = 255 × (1 - Y) × (1 - K)
+        /// 
+        /// Where C, M, Y, K are 0-1 values (we convert from 0-100 percentages)
+        /// </summary>
         private void ConvertToRGB()
         {
-            if (_isUpdatingFromRGB) return;
+            if (_isUpdatingFromRGB) return;  // Prevent circular updates
 
-            _isUpdatingFromCMYK = true;
+            _isUpdatingFromCMYK = true;  // Set guard
 
+            // Convert from 0-100 to 0-1 range and clamp
             double c = Math.Clamp(CmykCyan / 100.0, 0, 1);
             double m = Math.Clamp(CmykMagenta / 100.0, 0, 1);
             double y = Math.Clamp(CmykYellow / 100.0, 0, 1);
             double k = Math.Clamp(CmykBlack / 100.0, 0, 1);
 
+            // Apply conversion formula
             RgbRed = (int)Math.Round(255 * (1 - c) * (1 - k));
             RgbGreen = (int)Math.Round(255 * (1 - m) * (1 - k));
             RgbBlue = (int)Math.Round(255 * (1 - y) * (1 - k));
 
-            _isUpdatingFromCMYK = false;
-            UpdateColor();
+            _isUpdatingFromCMYK = false;  // Clear guard
+            UpdateColor();  // Update preview
         }
 
+        /// <summary>
+        /// Converts current RGB values to CMYK.
+        /// 
+        /// RGB TO CMYK CONVERSION FORMULA:
+        /// 1. Find K (black) = 1 - max(R, G, B)  [where R,G,B are 0-1]
+        /// 2. C = (1 - R - K) / (1 - K)
+        /// 3. M = (1 - G - K) / (1 - K)
+        /// 4. Y = (1 - B - K) / (1 - K)
+        /// 
+        /// Special case: Pure black (R=G=B=0) gives K=100%, C=M=Y=0%
+        /// </summary>
         private void UpdateCmykSlider()
         {
-            if (_isUpdatingFromCMYK) return;
+            if (_isUpdatingFromCMYK) return;  // Prevent circular updates
 
-            _isUpdatingFromRGB = true;
+            _isUpdatingFromRGB = true;  // Set guard
 
+            // Special case: Pure black
             if (RgbRed == 0 && RgbGreen == 0 && RgbBlue == 0)
             {
                 CmykCyan = 0;
@@ -316,19 +385,22 @@ namespace ColorMix.ViewModel
                 return;
             }
 
+            // Convert RGB from 0-255 to 0-1 range
             double r = RgbRed / 255.0;
             double g = RgbGreen / 255.0;
             double b = RgbBlue / 255.0;
 
+            // Calculate K (black) - the darkest component
             double k = 1 - Math.Max(r, Math.Max(g, b));
-            double invK = 1 - k;
+            double invK = 1 - k;  // For division
 
+            // Calculate C, M, Y and convert to 0-100 percentages
             CmykCyan = (int)Math.Round(100 * (1 - r - k) / invK);
             CmykMagenta = (int)Math.Round(100 * (1 - g - k) / invK);
             CmykYellow = (int)Math.Round(100 * (1 - b - k) / invK);
             CmykBlack = (int)Math.Round(100 * k);
 
-            _isUpdatingFromRGB = false;
+            _isUpdatingFromRGB = false;  // Clear guard
         }
 
         private string _hexEntry;

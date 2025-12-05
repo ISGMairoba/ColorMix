@@ -1,3 +1,17 @@
+/// <summary>
+/// This file contains the ViewModel for the Create/Edit Palette page.
+/// 
+/// WHAT IS MVVM?
+/// MVVM (Model-View-ViewModel) is a design pattern that separates:
+/// - Model: Data and business logic (our Entity classes)
+/// - View: User interface (XAML files)
+/// - ViewModel: Connects View and Model, contains UI logic and data
+/// 
+/// WHY USE VIEWMODELS?
+/// - Separates UI from logic (easier to test and maintain)
+/// - Enables data binding (UI automatically updates when data changes)
+/// - Keeps Views simple (they just display data, logic is in ViewModel)
+/// </summary>
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -11,11 +25,34 @@ using Microsoft.Maui.Graphics;
 
 namespace ColorMix.ViewModel
 {
+    /// <summary>
+    /// ViewModel for the Create/Edit Palette page.
+    /// 
+    /// This ViewModel handles:
+    /// - Creating and editing palettes (collections of colors)
+    /// - Mixing colors together in specific ratios
+    /// - Saving mix variants for later use
+    /// - Matching colors to user-specified targets
+    /// 
+    /// Implements INotifyPropertyChanged: Notifies the View when data changes
+    /// Implements IQueryAttributable: Receives navigation parameters (like PaletteId)
+    /// </summary>
     public class CreatePaletteViewModel : INotifyPropertyChanged, IQueryAttributable
     {
+        /// <summary>
+        /// Event fired when any property changes.
+        /// The View binds to properties and listens to this event to update the UI.
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        // ===== SELECTION PROPERTIES =====
+        // These track what the user has selected for deletion
+
         private Palette _selectedVariant;
+        /// <summary>
+        /// Currently selected color mix variant (for deletion).
+        /// When set, clears SelectedPaletteColor (can only delete one thing at a time).
+        /// </summary>
         public Palette SelectedVariant
         {
             get => _selectedVariant;
@@ -25,13 +62,17 @@ namespace ColorMix.ViewModel
                 OnPropertyChanged();
                 if (_selectedVariant != null)
                 {
-                    SelectedPaletteColor = null;
+                    SelectedPaletteColor = null;  // Deselect color if variant selected
                 }
-                OnPropertyChanged(nameof(IsDeleteVisible));
+                OnPropertyChanged(nameof(IsDeleteVisible));  // Update delete button visibility
             }
         }
 
         private ColorEntity _selectedPaletteColor;
+        /// <summary>
+        /// Currently selected palette color (for deletion).
+        /// When set, clears SelectedVariant (can only delete one thing at a time).
+        /// </summary>
         public ColorEntity SelectedPaletteColor
         {
             get => _selectedPaletteColor;
@@ -41,47 +82,76 @@ namespace ColorMix.ViewModel
                 OnPropertyChanged();
                 if (_selectedPaletteColor != null)
                 {
-                    SelectedVariant = null;
+                    SelectedVariant = null;  // Deselect variant if color selected
                 }
-                OnPropertyChanged(nameof(IsDeleteVisible));
+                OnPropertyChanged(nameof(IsDeleteVisible));  // Update delete button visibility
             }
         }
 
+        /// <summary>
+        /// Determines if the delete button should be visible.
+        /// Shows when either a color or variant is selected.
+        /// This is a computed property - it calculates the value from other properties.
+        /// </summary>
         public bool IsDeleteVisible => SelectedPaletteColor != null || SelectedVariant != null;
 
+        // ===== DATA COLLECTIONS AND STATE =====
+        // These hold all the data needed by the View
+
+        // Backing fields (private variables that store the actual data)
         private ObservableCollection<ColorEntity> _paletteColors = new();
         private ObservableCollection<MixColor> _mixComponents = new();
         private ObservableCollection<Palette> _variants = new();
         private Color _mixedColor = Colors.Gray;
         private string _blendMode = "RGB";
-        private int? _currentPaletteId;
+        private int? _currentPaletteId;  // null means creating new, number means editing existing
         private string _pageTitle = "Create Palette";
         private string _currentPaletteName = "";
 
+        /// <summary>
+        /// Colors in this palette.
+        /// ObservableCollection automatically notifies the UI when items are added/removed.
+        /// </summary>
         public ObservableCollection<ColorEntity> PaletteColors
         {
             get => _paletteColors;
             set { _paletteColors = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Components in the current color mix.
+        /// Each component is a color with a specific ratio (e.g., "2 parts Red").
+        /// </summary>
         public ObservableCollection<MixColor> MixComponents
         {
             get => _mixComponents;
             set { _mixComponents = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Saved color mix variants for this palette.
+        /// Each variant is a specific combination of colors that produces a result color.
+        /// </summary>
         public ObservableCollection<Palette> Variants
         {
             get => _variants;
             set { _variants = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// The resulting color from mixing the current components.
+        /// Recalculated automatically when components or ratios change.
+        /// </summary>
         public Color MixedColor
         {
             get => _mixedColor;
             set { _mixedColor = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Color blending mode ("RGB" is the only mode currently implemented).
+        /// When changed, the mix is recalculated.
+        /// </summary>
         public string BlendMode
         {
             get => _blendMode;
@@ -91,39 +161,86 @@ namespace ColorMix.ViewModel
                 {
                     _blendMode = value;
                     OnPropertyChanged();
-                    RecalculateMix();
+                    RecalculateMix();  // Recalculate with new blend mode
                 }
             }
         }
 
+        /// <summary>
+        /// Title shown at the top of the page.
+        /// "Create Palette" when creating new, "Edit: [Name]" when editing.
+        /// </summary>
         public string PageTitle
         {
             get => _pageTitle;
             set { _pageTitle = value; OnPropertyChanged(); }
         }
 
+        // ===== DATABASE CONTEXT =====
+        /// <summary>
+        /// Database context for accessing color and palette data.
+        /// Created directly here (not via DI) to keep ViewModel independent.
+        /// </summary>
         private readonly ColorMixDbContext _dbContext;
 
+        // ===== COMMANDS =====
+        // Commands connect UI actions (button clicks) to ViewModel methods.
+        // In XAML, you bind a Button's Command property to one of these.
+        // When the button is clicked, the corresponding method runs.
+
+        /// <summary>Opens dialog to add a color to the palette from the database.</summary>
         public ICommand AddColorCommand { get; }
+        
+        /// <summary>Removes the selected color or variant.</summary>
         public ICommand RemoveColorCommand { get; }
+        
+        /// <summary>Saves the current color mix as a named variant.</summary>
         public ICommand SaveVariantCommand { get; }
+        
+        /// <summary>Saves the entire palette to the database.</summary>
         public ICommand SavePaletteCommand { get; }
+        
+        /// <summary>Attempts to match a target color by adjusting mix ratios.</summary>
         public ICommand MatchCommand { get; }
+        
+        /// <summary>Calculates quantity estimates for mixing (e.g., how many liters of each color).</summary>
         public ICommand EstimateCommand { get; }
+        
+        /// <summary>Clears the current color mix.</summary>
         public ICommand ClearCommand { get; }
+        
+        /// <summary>Handles mode changes (used for toolbar actions).</summary>
         public ICommand ChangeModeCommand { get; }
+        
+        /// <summary>Increases the ratio of a component in the mix.</summary>
         public ICommand IncrementCommand { get; }
+        
+        /// <summary>Decreases the ratio of a component in the mix.</summary>
         public ICommand DecrementCommand { get; }
+        
+        /// <summary>Adds a palette color to the current mix.</summary>
         public ICommand AddColorToMixCommand { get; }
+        
+        /// <summary>Loads a saved variant into the current mix.</summary>
         public ICommand LoadVariantCommand { get; }
 
+        public ICommand OnBackButtonPressedCommand { get; } // This command will be triggered when the user clicks BACK
+
+        /// <summary>
+        /// Constructor - Sets up the ViewModel when it's created.
+        /// This is called automatically by MAUI when navigating to the page.
+        /// </summary>
         public CreatePaletteViewModel()
         {
+            // Set up database connection
+            // Create options that specify SQLite database path
             var options = new DbContextOptionsBuilder<ColorMixDbContext>()
                 .UseSqlite($"Filename={Path.Combine(FileSystem.AppDataDirectory, "colormix.db")}")
                 .Options;
             _dbContext = new ColorMixDbContext(options);
 
+            // Wire up commands to their handler methods
+            // "new Command(OnAddColor)" means "when this command executes, call OnAddColor()"
             AddColorCommand = new Command(OnAddColor);
             RemoveColorCommand = new Command(OnRemoveColor);
             SaveVariantCommand = new Command(OnSaveVariant);
@@ -131,15 +248,21 @@ namespace ColorMix.ViewModel
             MatchCommand = new Command(OnMatch);
             EstimateCommand = new Command(OnEstimate);
             ClearCommand = new Command(OnClear);
-            ChangeModeCommand = new Command<string>(OnChangeMode);
-            IncrementCommand = new Command<MixColor>(OnIncrement);
+            ChangeModeCommand = new Command<string>(OnChangeMode);  // Takes a string parameter
+            IncrementCommand = new Command<MixColor>(OnIncrement);  // Takes a MixColor parameter
             DecrementCommand = new Command<MixColor>(OnDecrement);
             AddColorToMixCommand = new Command<ColorEntity>(OnAddColorToMix);
             LoadVariantCommand = new Command<Palette>(OnLoadVariant);
-
+            OnBackButtonPressedCommand = new Command(async () => await HandleBackPress());
+            // Initialize database asynchronously
             InitializeAsync();
         }
 
+        /// <summary>
+        /// Initializes the database asynchronously.
+        /// Called from constructor to ensure database is ready before use.
+        /// Using "async void" here is okay because it's an event handler pattern.
+        /// </summary>
         private async void InitializeAsync()
         {
             try
@@ -148,27 +271,57 @@ namespace ColorMix.ViewModel
             }
             catch (Exception ex)
             {
+                // Log error but don't crash - database will be created on first use if this fails
                 System.Diagnostics.Debug.WriteLine($"Error initializing CreatePaletteViewModel: {ex.Message}");
             }
         }
 
+        /// <summary>
+        /// Receives navigation parameters when navigating to this page.
+        /// This is part of IQueryAttributable - MAUI calls this automatically.
+        /// 
+        /// Navigation example: Shell.GoToAsync($"CreatePalette?PaletteId={id}")
+        /// The query dictionary would then contain { "PaletteId": id }
+        /// </summary>
+        /// <param name="query">Dictionary of navigation parameters</param>
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
+            // Check if we received a PaletteId parameter (means editing existing palette)
             if (query != null && query.ContainsKey("PaletteId") && query["PaletteId"] != null)
             {
+                // Try to parse the ID as an integer
                 if (int.TryParse(query["PaletteId"].ToString(), out int paletteId) && paletteId > 0)
                 {
                     _currentPaletteId = paletteId;
-                    await LoadPaletteAsync(paletteId);
+                    await LoadPaletteAsync(paletteId);  // Load the existing palette
                     return;
                 }
             }
             
-            // No valid palette ID, reset to create mode
+            // No valid palette ID means we're creating a new palette
             _currentPaletteId = null;
             PageTitle = "Create Palette";
             _currentPaletteName = "";
-            ResetState();
+            ResetState();  // Clear all data
+        }
+
+        private async Task HandleBackPress()
+        {
+            // Show a popup asking the user what they want to do
+            bool discard = await Shell.Current.DisplayAlert(
+                "Unsaved Changes",         // Title of the popup
+                "Discard your current changes?", // Message
+                "Discard",                 // Button 1
+                "Cancel"                     // Button 2
+            );
+
+            // If the user chooses "Discard"
+            if (discard)
+            {
+                // Go back to the previous page
+                await Shell.Current.GoToAsync("..");
+            }
+            
         }
 
         private void ResetState()
@@ -196,7 +349,7 @@ namespace ColorMix.ViewModel
                 {
                     // Update page title with palette name
                     _currentPaletteName = savedPalette.Name;
-                    PageTitle = $"Edit: {savedPalette.Name}";
+                    PageTitle = savedPalette.Name;
 
                     // Load colors
                     if (savedPalette.Colors != null)
@@ -701,14 +854,32 @@ namespace ColorMix.ViewModel
              else if (parameter == "Clear") OnClear();
         }
 
+        /// <summary>
+        /// Recalculates the mixed color based on current components and their ratios.
+        /// 
+        /// COLOR MIXING ALGORITHM:
+        /// 1. Calculate each component's percentage of the total mix
+        /// 2. For each RGB channel, calculate weighted average based on ratios
+        /// 3. Normalize to 0-1 range (MAUI Color uses 0-1, not 0-255)
+        /// 
+        /// Example: 2 parts Red (#FF0000) + 1 part Blue (#0000FF)
+        /// - Total ratio = 3
+        /// - Red percentage = 66.67%, Blue = 33.33%
+        /// - Final Red channel = (1.0 * 2 + 0.0 * 1) / 3 = 0.667
+        /// - Final Green channel = (0.0 * 2 + 0.0 * 1) / 3 = 0.0
+        /// - Final Blue channel = (0.0 * 2 + 1.0 * 1) / 3 = 0.333
+        /// - Result = RGB(0.667, 0, 0.333) which is a purple color
+        /// </summary>
         private void RecalculateMix()
         {
+            // No components? Show gray as default
             if (!MixComponents.Any())
             {
                 MixedColor = Colors.Gray;
                 return;
             }
 
+            // Calculate total ratio (sum of all component ratios)
             double totalRatio = MixComponents.Sum(c => c.Ratio);
             if (totalRatio == 0)
             {
@@ -716,28 +887,42 @@ namespace ColorMix.ViewModel
                 return;
             }
 
+            // Variables to accumulate weighted RGB values
             double r = 0, g = 0, b = 0;
 
+            // For each component, add its contribution to the final color
             foreach (var comp in MixComponents)
             {
+                // Update percentage for UI display
                 comp.Percentage = (comp.Ratio / totalRatio) * 100;
                 
+                // Add weighted RGB values
+                // comp.Color.Red is 0-1, multiply by ratio to weight it
                 r += comp.Color.Red * comp.Ratio;
                 g += comp.Color.Green * comp.Ratio;
                 b += comp.Color.Blue * comp.Ratio;
             }
 
+            // Divide by total ratio to get average
             r /= totalRatio;
             g /= totalRatio;
             b /= totalRatio;
 
+            // Clamp to valid range (0-1) in case of floating point errors
             r = Math.Clamp(r, 0, 1);
             g = Math.Clamp(g, 0, 1);
             b = Math.Clamp(b, 0, 1);
 
+            // Create the final mixed color
             MixedColor = new Color((float)r, (float)g, (float)b);
         }
 
+        /// <summary>
+        /// Notifies the View that a property has changed.
+        /// [CallerMemberName] automatically fills in the property name.
+        /// The View's data bindings listen to PropertyChanged events and update the UI.
+        /// </summary>
+        /// <param name="propertyName">Name of the changed property (auto-filled)</param>
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

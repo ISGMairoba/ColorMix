@@ -1,4 +1,16 @@
-﻿using System.Collections.ObjectModel;
+﻿/// <summary>
+/// This file is the code-behind for MainPage.xaml - the main palette list page.
+/// This is also a ViewModel (ContentPage + INotifyPropertyChanged).
+/// 
+/// This page combines View and ViewModel in one file (not pure MVVM, but simpler for this case).
+/// It manages:
+/// - Displaying saved palettes
+/// - Search and filtering
+/// - Sorting (by date or name)
+/// - Selection mode for batch operations
+/// - Edit, duplicate, share, delete operations (single and batch)
+/// </summary>
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 using ColorMix.Data;
@@ -9,6 +21,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ColorMix
 {
+    /// <summary>
+    /// Main page showing the list of saved palettes.
+    /// Implements INotifyPropertyChanged to support data binding (acts like a ViewModel).
+    /// </summary>
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
         public ObservableCollection<Palette> Palettes { get; set; } = new();

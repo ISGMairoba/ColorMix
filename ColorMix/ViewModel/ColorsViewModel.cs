@@ -1,3 +1,12 @@
+/// <summary>
+/// This file contains the ViewModel for the Colors list page.
+/// This ViewModel manages:
+/// - Displaying a list of saved colors
+/// - Search and filtering
+/// - Sorting by different criteria
+/// - Single and batch operations (edit, duplicate, delete, share)
+/// - Selection mode for multi-select
+/// </summary>
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -10,15 +19,28 @@ using CommunityToolkit.Maui.Core;
 
 namespace ColorMix.ViewModel
 {
+    /// <summary>
+    /// ViewModel for the Colors list page.
+    /// Handles displaying colors with search, sort, and batch operation capabilities.
+    /// </summary>
     public class ColorsViewModel : INotifyPropertyChanged
     {
+        // Service for database operations
         private readonly IColorService _colorService;
+        
+        // Data collections
         private ObservableCollection<ColorsModel> _colorList = new();
-        private List<ColorsModel> _allColors = new(); // Store all colors for filtering
+        private List<ColorsModel> _allColors = new(); // Cache all colors for fast filtering
+        
+        // Search and sort state
         private string _searchText = string.Empty;
         private SortOption _currentSortOption = SortOption.DateCreated;
         private System.Threading.Timer _searchDebounceTimer;
 
+        /// <summary>
+        /// The filtered and sorted list of colors displayed in the UI.
+        /// ObservableCollection automatically updates the UI when items change.
+        /// </summary>
         public ObservableCollection<ColorsModel> ColorList
         {
             get => _colorList;
@@ -29,6 +51,11 @@ namespace ColorMix.ViewModel
             }
         }
 
+        /// <summary>
+        /// Search text entered by the user.
+        /// Uses debouncing: waits 750ms after user stops typing before searching.
+        /// This prevents excessive filtering while user is still typing.
+        /// </summary>
         public string SearchText
         {
             get => _searchText;
@@ -39,16 +66,21 @@ namespace ColorMix.ViewModel
                 OnPropertyChanged();
                 
                 // Debounce search to improve performance
+                // Cancel any existing timer and start a new one
                 _searchDebounceTimer?.Dispose();
                 _searchDebounceTimer = new System.Threading.Timer(
                     _ => MainThread.BeginInvokeOnMainThread(() => ApplySortAndFilter()),
                     null,
-                    750, // 750ms delay
-                    System.Threading.Timeout.Infinite
+                    750, // Wait 750ms after last keystroke
+                    System.Threading.Timeout.Infinite  // Don't repeat
                 );
             }
         }
 
+        /// <summary>
+        /// Currently selected sort option.
+        /// When changed, immediately re-sorts and re-filters the list.
+        /// </summary>
         public SortOption CurrentSortOption
         {
             get => _currentSortOption;
@@ -57,13 +89,21 @@ namespace ColorMix.ViewModel
                 if (_currentSortOption == value) return;
                 _currentSortOption = value;
                 OnPropertyChanged();
-                ApplySortAndFilter();
+                ApplySortAndFilter();  // Immediately apply new sort
             }
         }
 
+        /// <summary>
+        /// List of all available sort options for binding to a picker/dropdown.
+        /// Gets all values from the SortOption enum.
+        /// </summary>
         public List<SortOption> SortOptions { get; } = Enum.GetValues(typeof(SortOption)).Cast<SortOption>().ToList();
 
         private bool _isSearching;
+        /// <summary>
+        /// Whether the search bar is currently visible.
+        /// When set to false, clears the search text.
+        /// </summary>
         public bool IsSearching
         {
             get => _isSearching;
@@ -80,6 +120,11 @@ namespace ColorMix.ViewModel
         }
 
         private bool _isSelectionMode;
+        /// <summary>
+        /// Whether the UI is in selection mode for batch operations.
+        /// When enabled, shows checkboxes and batch operation buttons.
+        /// When disabled, clears all selections.
+        /// </summary>
         public bool IsSelectionMode
         {
             get => _isSelectionMode;
@@ -90,7 +135,7 @@ namespace ColorMix.ViewModel
                 OnPropertyChanged();
                 if (!_isSelectionMode)
                 {
-                    // Clear selection when exiting mode
+                    // Clear all selections when exiting selection mode
                     foreach (var color in ColorList) color.IsSelected = false;
                     OnPropertyChanged(nameof(SelectedCount));
                 }
@@ -98,14 +143,20 @@ namespace ColorMix.ViewModel
         }
 
 
+        /// <summary>
+        /// Number of currently selected colors.
+        /// Used to show "3 selected" in the UI.
+        /// </summary>
         public int SelectedCount => ColorList.Count(c => c.IsSelected);
 
+        // ===== COMMANDS =====
+        // Single item operations
         public ICommand EditCommand { get; }
         public ICommand DuplicateCommand { get; }
         public ICommand ShareCommand { get; }
         public ICommand DeleteCommand { get; }
         
-        // Batch Commands
+        // Batch operations
         public ICommand ToggleSelectionModeCommand { get; }
         public ICommand SelectAllCommand { get; }
         public ICommand DeselectAllCommand { get; }
@@ -113,25 +164,34 @@ namespace ColorMix.ViewModel
         public ICommand BatchDuplicateCommand { get; }
         public ICommand BatchShareCommand { get; }
 
+        // UI controls
         public ICommand ToggleSearchCommand { get; }
         public ICommand OpenSortCommand { get; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        /// <summary>
+        /// Constructor - receives ColorService via dependency injection.
+        /// Sets up all commands and their handlers.
+        /// </summary>
+        /// <param name="colorService">Service for color data operations</param>
         public ColorsViewModel(IColorService colorService)
         {
             _colorService = colorService;
 
+            // Wire up single-item commands
             EditCommand = new Command<ColorsModel>(async (color) => await OnEditAsync(color));
             DuplicateCommand = new Command<ColorsModel>(async (color) => await OnDuplicateAsync(color));
             ShareCommand = new Command<ColorsModel>(async (color) => await OnShareAsync(color));
             DeleteCommand = new Command<ColorsModel>(async (color) => await OnDeleteAsync(color));
 
+            // Wire up selection mode commands
             ToggleSelectionModeCommand = new Command(() => IsSelectionMode = !IsSelectionMode);
             
+            // Smart select all: toggles between all selected and none selected
             SelectAllCommand = new Command(() =>
             {
-                // Smart toggle: if all are selected, deselect all; otherwise select all
+                // If all are selected, deselect all; otherwise select all
                 bool allSelected = ColorList.All(c => c.IsSelected);
                 foreach (var color in ColorList) color.IsSelected = !allSelected;
                 OnPropertyChanged(nameof(SelectedCount));
@@ -143,10 +203,12 @@ namespace ColorMix.ViewModel
                 OnPropertyChanged(nameof(SelectedCount));
             });
 
+            // Wire up batch operation commands
             BatchDeleteCommand = new Command(async () => await OnBatchDeleteAsync());
             BatchDuplicateCommand = new Command(async () => await OnBatchDuplicateAsync());
             BatchShareCommand = new Command(async () => await OnBatchShareAsync());
 
+            // Wire up UI control commands
             ToggleSearchCommand = new Command(() => IsSearching = !IsSearching);
             OpenSortCommand = new Command(async () => await OnOpenSortAsync());
         }
@@ -265,18 +327,23 @@ namespace ColorMix.ViewModel
             IsSelectionMode = false;
         }
 
+        /// <summary>
+        /// Applies current sort option and search filter to the color list.
+        /// This method is called when search text changes or sort option changes.
+        /// </summary>
         private void ApplySortAndFilter()
         {
             IEnumerable<ColorsModel> filtered = _allColors;
 
-            // Filter
+            // Apply search filter if search text exists
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
+                // Search in both name and hex value (case-insensitive)
                 filtered = filtered.Where(c => c.ColorName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) || 
                                                c.HexValue.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Sort
+            // Apply sorting based on current sort option
             filtered = CurrentSortOption switch
             {
                 SortOption.Name => filtered.OrderBy(c => c.ColorName),
@@ -284,10 +351,11 @@ namespace ColorMix.ViewModel
                 SortOption.Red => filtered.OrderByDescending(c => c.Color.Red),
                 SortOption.Green => filtered.OrderByDescending(c => c.Color.Green),
                 SortOption.Blue => filtered.OrderByDescending(c => c.Color.Blue),
-                SortOption.Hue => filtered.OrderBy(c => c.Color.GetHue()),
-                _ => filtered
+                SortOption.Hue => filtered.OrderBy(c => c.Color.GetHue()),  // Order by hue (color wheel position)
+                _ => filtered  // No sort
             };
 
+            // Update the displayed list
             ColorList = new ObservableCollection<ColorsModel>(filtered);
         }
 
@@ -404,6 +472,12 @@ namespace ColorMix.ViewModel
             }
         }
 
+        /// <summary>
+        /// Creates a ColorsModel from a ColorEntity.
+        /// Also hooks up property change events to update SelectionCount.
+        /// </summary>
+        /// <param name="colorEntity">Entity from database</param>
+        /// <returns>Model for UI binding</returns>
         private ColorsModel CreateColorModel(ColorEntity colorEntity)
         {
             var color = Color.FromRgb(colorEntity.Red, colorEntity.Green, colorEntity.Blue);
@@ -412,7 +486,7 @@ namespace ColorMix.ViewModel
                 Id = colorEntity.Id,
                 DateCreated = colorEntity.CreatedAt
             };
-            // Hook up property changed for selection count
+            // Hook up property changed: when IsSelected changes, update SelectedCount
             colorModel.PropertyChanged += (s, e) => 
             {
                 if (e.PropertyName == nameof(ColorsModel.IsSelected))
